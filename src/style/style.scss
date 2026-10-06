@@ -1,0 +1,18 @@
+// src/style/style.scss
+@use "./variables.scss" as *; // 引入纯变量文件
+
+/* 全局重置 */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* 应用亮色与暗色主题 */
+:root {
+  @include apply-theme(light);
+}
+
+html.dark {
+  @include apply-theme(dark);
+}

@@ -1,0 +1,23 @@
+// src/style/variables.scss
+@use "sass:map";
+
+$themes: (
+  light: (
+    bg-color: #111,
+    text-color: #333,
+  ),
+  dark: (
+    bg-color: #eee,
+    text-color: #ccc,
+  ),
+);
+
+@mixin apply-theme($theme-name) {
+  $theme-map: map.get($themes, $theme-name);  // ✅ 已替换
+  @each $key, $value in $theme-map {
+    --my-#{$key}: #{$value};
+  }
+}
+
+$my-bg-color: var(--my-bg-color);
+$my-text-color: var(--my-text-color);

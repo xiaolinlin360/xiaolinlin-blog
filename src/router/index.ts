@@ -1,7 +1,7 @@
-import { createMemoryHistory, createRouter } from 'vue-router'
+import { createRouter, createWebHashHistory } from 'vue-router'
 
 import HomeView from '../views/Home.vue'
-import AboutView from '../components/HelloWorld.vue'
+import AboutView from '../views/HelloWorld.vue'
 
 const routes = [
   { path: '/', component: HomeView },
@@ -9,7 +9,7 @@ const routes = [
 ]
 
 const router = createRouter({
-  history: createMemoryHistory(),
+  history: createWebHashHistory(),
   routes,
 })
 
