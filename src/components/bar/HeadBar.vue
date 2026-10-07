@@ -68,7 +68,7 @@ const handleLogout = (): void => {
   align-items: center;
   height: 60px;
   padding: 0 24px;
-  background-color: #ffffff;
+  background-color: $my-bg-page;
   box-shadow: 0 1px 4px rgba(0, 21, 41, 0.08);
   /* 如果希望有图中那种底部蓝色边线，可以加下面这行 */
   /* border-bottom: 2px solid #409eff; */
@@ -96,7 +96,7 @@ const handleLogout = (): void => {
       .logo-empty {
         width: 32px;
         height: 32px;
-        background-color: $my-bg-color;
+        background-color: $my-bg-page;
         border-radius: 4px;
       }
     }
@@ -104,7 +104,7 @@ const handleLogout = (): void => {
     .title {
       font-size: 18px;
       font-weight: 600;
-      color: #303133;
+      color: $my-text-main;
       letter-spacing: 1px;
     }
   }
@@ -128,7 +128,7 @@ const handleLogout = (): void => {
     }
 
     .action-icon {
-      color: $my-text-color;
+      color: $my-text-main;
     }
 
     /* 调整红点位置 */

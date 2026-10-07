@@ -3,21 +3,40 @@
 
 $themes: (
   light: (
-    bg-color: #111,
-    text-color: #333,
+    bg-page: #f4f5f7,        // 整体页面背景
+    bg-card: #ffffff,        // 卡片背景
+    bg-hover: #f8f8f8,       // 悬浮背景
+    text-main: #111111,      // 主要文字
+    text-sub: #666666,       // 次要文字
+    border-color: #e8e8e8,   // 边框颜色
+    shadow-color: rgba(0, 0, 0, 0.05), // 阴影
   ),
   dark: (
-    bg-color: #eee,
-    text-color: #ccc,
+    bg-page: #02152c,        // 参考你图2的深蓝色调
+    bg-card: #00263c,        // 卡片深色
+    bg-hover: #111111,       // 悬浮深色
+    text-main: #eeeeee,      // 主要文字
+    text-sub: #a0a0a0,       // 次要文字
+    border-color: #444444,   // 边框颜色
+    shadow-color: rgba(0, 0, 0, 0.3),  // 阴影
   ),
 );
 
 @mixin apply-theme($theme-name) {
-  $theme-map: map.get($themes, $theme-name);  // ✅ 已替换
+  $theme-map: map.get($themes, $theme-name);
   @each $key, $value in $theme-map {
     --my-#{$key}: #{$value};
   }
 }
 
-$my-bg-color: var(--my-bg-color);
-$my-text-color: var(--my-text-color);
+:root { @include apply-theme(light); }
+html.dark { @include apply-theme(dark); }
+
+// 暴露给 SCSS 的快捷变量
+$my-bg-page: var(--my-bg-page);
+$my-bg-card: var(--my-bg-card);
+$my-bg-hover: var(--my-bg-hover);
+$my-text-main: var(--my-text-main);
+$my-text-sub: var(--my-text-sub);
+$my-border-color: var(--my-border-color);
+$my-shadow-color: var(--my-shadow-color);

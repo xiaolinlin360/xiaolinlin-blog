@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import HeadBar from './components/HeadBar.vue'
+import HeadBar from './components/bar/HeadBar.vue'
 </script>
 
 <template>
