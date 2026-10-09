@@ -1,7 +1,7 @@
 import axios from 'axios'
 import { useUserStore } from '@/stores/index.ts'
 import { ElMessage } from 'element-plus'
-import router from '@/router/index.js'
+import router from '@/router/index.ts'
 
 const url = 'http://localhost:3001'
 const http = axios.create({
@@ -22,6 +22,7 @@ http.interceptors.request.use(
   },
   (error) => {
     // 对请求错误做些什么
+    console.log(error)
     return Promise.reject(error)
   }
 )
@@ -31,7 +32,7 @@ http.interceptors.response.use(
   (response) => {
     // 2xx 范围内的状态码都会触发该函数。
     // 对响应数据做点什么
-    if (response.data.code === 0) {
+    if (response.data.code === 200) {
       return response
     }
     ElMessage.error(response.data.message || '请求失败')
@@ -39,6 +40,7 @@ http.interceptors.response.use(
   },
   (error) => {
     if (error.response.status === 401) {
+      console.log(error)
       ElMessage.error('登录过期，请重新登录')
       router.push('/login')
       return Promise.reject(error)
