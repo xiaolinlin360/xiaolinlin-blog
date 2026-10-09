@@ -3,43 +3,54 @@ import { createRouter, createWebHashHistory } from 'vue-router'
 import AboutView from '../views/HelloWorld.vue'
 import IndexView from '../views/IndexView.vue'
 import OverviewView from '@/views/overview.vue'
+import FilesView from '@/views/FilesView.vue'
+import GalleryView from '@/views/GalleryView.vue'
+import NotesView from '@/views/NotesView.vue'
+import ResourcesView from '@/views/ResourcesView.vue'
+import SettingsView from '@/views/SettingsView.vue'
+import BlogView from '@/views/BlogView.vue'
 
 const routes = [
   {
     path: '/',
     component: IndexView,
-    redirect: '/files',
+    redirect: '/OverviewView',
     children: [
+      {
+        path: '/OverviewView',
+        name: 'OverviewView',
+        component: OverviewView,
+      },
       {
         path: '/files',
         name: 'Files',
-        component: OverviewView,
+        component: FilesView,
       },
-      // {
-      //   path: '/blog',
-      //   name: 'Blog',
-      //   component: () => import('../views/BlogView.vue'),
-      // },
-      // {
-      //   path: '/gallery',
-      //   name: 'Gallery',
-      //   component: () => import('../views/GalleryView.vue'),
-      // },
-      // {
-      //   path: '/notes',
-      //   name: 'Notes',
-      //   component: () => import('../views/NotesView.vue'),
-      // },
-      // {
-      //   path: '/resources',
-      //   name: 'Resources',
-      //   component: () => import('../views/ResourcesView.vue'),
-      // },
-      // {
-      //   path: '/settings',
-      //   name: 'Settings',
-      //   component: () => import('../views/SettingsView.vue'),
-      // },
+      {
+        path: '/blog',
+        name: 'Blog',
+        component: BlogView,
+      },
+      {
+        path: '/gallery',
+        name: 'Gallery',
+        component: GalleryView,
+      },
+      {
+        path: '/notes',
+        name: 'Notes',
+        component: NotesView,
+      },
+      {
+        path: '/resources',
+        name: 'Resources',
+        component: ResourcesView,
+      },
+      {
+        path: '/settings',
+        name: 'Settings',
+        component: SettingsView,
+      },
     ],
   },
   { path: '/about', component: AboutView },

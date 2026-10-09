@@ -38,7 +38,7 @@ interface MenuItem {
 
 // 菜单配置
 const menuList: MenuItem[] = [
-  { name: '总览', path: '/', icon: HomeFilled },
+  { name: '总览', path: '/OverviewView', icon: HomeFilled },
   { name: '本地文件', path: '/files', icon: Folder },
   { name: '博客文章', path: '/blog', icon: Document },
   { name: '摄影图库', path: '/gallery', icon: Camera },
