@@ -9,6 +9,7 @@ import NotesView from '@/views/NotesView.vue'
 import ResourcesView from '@/views/ResourcesView.vue'
 import SettingsView from '@/views/SettingsView.vue'
 import BlogView from '@/views/BlogView.vue'
+import LoginView from '@/views/login.vue'
 
 const routes = [
   {
@@ -54,6 +55,7 @@ const routes = [
     ],
   },
   { path: '/about', component: AboutView },
+  { path: '/login', component: LoginView },
 ]
 
 const router = createRouter({
