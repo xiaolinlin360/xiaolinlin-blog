@@ -31,3 +31,12 @@ interface TotalCommentRes {
 export const getTotalComment = () => {
   return http.post<any, TotalCommentRes>('/getTotalComment')
 }
+
+// 删除评论
+interface DeleteCommentReq {
+  code: number
+  data: { message: string; error: string }
+}
+export const deleteComment = (id: number) => {
+  return http.post<any, DeleteCommentReq>('/deleteComment', { id })
+}

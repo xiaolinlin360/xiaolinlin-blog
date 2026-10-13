@@ -14,7 +14,7 @@
           <div class="comment-header">
             <span class="nickname">{{ item.name }}</span>
             <span class="time">{{ item.created_at }}</span>
-            <el-icon class="delete-icon"><Delete /></el-icon>
+            <el-icon class="delete-icon" @click="handleDelete(item.id)"><Delete /></el-icon>
           </div>
           <p class="comment-text">{{ item.content }}</p>
 
@@ -47,7 +47,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { Delete } from '@element-plus/icons-vue'
-import { getComments, getTotalComment, type Comment } from '@/api/comments'
+import { getComments, getTotalComment, type Comment, deleteComment } from '@/api/comments'
 
 // 分页参数
 const currentPage = ref(1)
@@ -75,6 +75,11 @@ const handleCurrentChange = (val: number) => {
   fetchComments(val)
 }
 
+// 删除评论
+const handleDelete = async (id: number) => {
+  await deleteComment(id)
+  fetchComments(currentPage.value)
+}
 // 初始化
 onMounted(() => {
   fetchComments(currentPage.value)
