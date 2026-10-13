@@ -7,11 +7,12 @@
     <!-- 评论列表区域，高度自适应并支持内部滚动 -->
     <div class="comment-list">
       <div class="comment-item" v-for="item in commentList" :key="item.id">
-        <el-avatar :size="36" :src="item.user_imgurl" class="avatar" />
+        <!-- 先放着，等有时间再处理 -->
+        <el-avatar :size="36" :src="item.imgurl" class="avatar" />
 
         <div class="comment-body">
           <div class="comment-header">
-            <span class="nickname">{{ item.user_name }}</span>
+            <span class="nickname">{{ item.name }}</span>
             <span class="time">{{ item.created_at }}</span>
             <el-icon class="delete-icon"><Delete /></el-icon>
           </div>
@@ -32,12 +33,13 @@
     <div class="pagination-wrapper">
       <el-pagination
         v-model:current-page="currentPage"
-        :page-size="pageSize"
+        v-model:page-size="pageSize"
+        :page-sizes="[100, 200, 300, 400]"
+        size="default"
+        layout="total, sizes, prev, pager, next, jumper"
         :total="total"
-        layout="prev, pager, next"
-        small
-        background
-        @current-change="handlePageChange" />
+        @size-change="handleSizeChange"
+        @current-change="handleCurrentChange" />
     </div>
   </div>
 </template>
@@ -45,29 +47,30 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { Delete } from '@element-plus/icons-vue'
-import { mockComments, type Comment } from '@/mock/data'
+import { getComments, getTotalComment, type Comment } from '@/api/comments'
 
 // 分页参数
 const currentPage = ref(1)
 const pageSize = ref(5)
-const total = ref(44) // 假设这是后端返回的评论总数
-
+let total = ref(0)
 // 当前展示的评论数据
 const commentList = ref<Comment[]>([])
-
 // 模拟从后端根据页码获取数据的函数
-const fetchComments = (page: number) => {
-  // 这里模拟 API 请求延迟
-  console.log(`正在请求第 ${page} 页评论数据...`)
-  let allMockData: Comment[] = mockComments
-  // 根据页码和页大小切片
-  const start = (page - 1) * pageSize.value
-  const end = start + pageSize.value
-  commentList.value = allMockData.slice(start, end)
+const fetchComments = async (page: number) => {
+  const totalRes = await getTotalComment()
+  total.value = totalRes.data.total
+  const res = await getComments({ pageNum: page, pageSize: pageSize.value })
+  commentList.value = res.data.comments
+  console.dir(total.value)
+  console.dir(res)
 }
 
 // 监听页码变化
-const handlePageChange = (val: number) => {
+const handleSizeChange = (val: number) => {
+  pageSize.value = val
+  fetchComments(currentPage.value)
+}
+const handleCurrentChange = (val: number) => {
   currentPage.value = val
   fetchComments(val)
 }

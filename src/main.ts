@@ -4,7 +4,6 @@ import './style/style.scss'
 import 'element-plus/theme-chalk/dark/css-vars.css'
 import App from './App.vue'
 import router from './router/index'
-import { createPinia } from 'pinia'
-const pinia = createPinia()
+import pinia from './stores/index'
 
 createApp(App).use(router).use(pinia).mount('#app')

@@ -10,9 +10,8 @@ export const useUserStore = defineStore(
     const token = ref('')
     //设置token
     const setToken = (newToken: string) => {
-      token.value =
-        newToken ||
-        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwibmFtZSI6IuWNmuWuouS4uyIsImlhdCI6MTc5MTUzMDU3MCwiZXhwIjoxNzkyMTM1MzcwfQ.SDC18Thl6GsLa3JOJoHCz32jxjqUdsPu_Yqhim7karU'
+      token.value = `Bearer ${newToken}`
+      console.log(token.value)
     }
     //移除token
     const removeToken = () => {
@@ -20,8 +19,8 @@ export const useUserStore = defineStore(
     }
     const userData = ref({})
     //设置用户数据
-    const setUserData = (res: any) => {
-      userData.value = res.data
+    const setUserData = (user: any) => {
+      userData.value = user
     }
     return { token, setToken, removeToken, userData, setUserData }
   },

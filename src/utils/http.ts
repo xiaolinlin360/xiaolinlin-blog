@@ -15,6 +15,7 @@ http.interceptors.request.use(
   (config) => {
     // 在发送请求之前做些什么
     const userStore = useUserStore()
+    console.log(userStore.token)
     if (userStore.token) {
       config.headers.Authorization = userStore.token
     }
@@ -33,7 +34,7 @@ http.interceptors.response.use(
     // 2xx 范围内的状态码都会触发该函数。
     // 对响应数据做点什么
     if (response.data.code === 200) {
-      return response
+      return response.data
     }
     ElMessage.error(response.data.message || '请求失败')
     return Promise.reject(response.data)
