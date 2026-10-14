@@ -13,7 +13,7 @@
         <div class="comment-body">
           <div class="comment-header">
             <span class="nickname">{{ item.name }}</span>
-            <span class="time">{{ item.created_at }}</span>
+            <span class="time">{{ formatTime(item.created_at) }}</span>
             <el-icon class="delete-icon" @click="handleDelete(item.id)"><Delete /></el-icon>
           </div>
           <p class="comment-text">{{ item.content }}</p>
@@ -48,6 +48,7 @@
 import { ref, onMounted } from 'vue'
 import { Delete } from '@element-plus/icons-vue'
 import { getComments, getTotalComment, type Comment, deleteComment } from '@/api/comments'
+import formatTime from '@/utils/formatTime'
 
 const currentPage = ref(1)
 const pageSize = ref(5)

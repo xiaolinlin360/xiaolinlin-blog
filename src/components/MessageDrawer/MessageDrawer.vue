@@ -30,7 +30,21 @@
               <span class="sender-name">{{ item.sender_name || '未知用户' }}</span>
               <span class="time">{{ formatTime(item.created_at) }}</span>
             </div>
-            <div class="message-text">{{ item.content }}</div>
+
+            <!-- 渲染 content 和 msg_type -->
+            <div class="message-text">
+              <template v-if="item.msg_type === 1">{{ item.content }}</template>
+              <template v-else-if="item.msg_type === 2">[图片消息]</template>
+              <template v-else>[其他类型消息]</template>
+            </div>
+
+            <!-- 底部操作栏：说明 & 举报 & 编辑状态!!!!!!!!!!!!!!!!待补充 -->
+            <div class="bottom-actions" @click.stop>
+              <!-- 如果更新时间和创建时间不一致，说明改过，渲染 updated_at 相关说明 -->
+              <span v-if="item.updated_at !== item.created_at" class="edit-tag">已编辑</span>
+              <span class="action-btn">说明</span>
+              <span class="action-btn report">举报</span>
+            </div>
           </div>
 
           <!-- 悬浮删除按钮 -->
@@ -51,6 +65,7 @@ import { ref, computed } from 'vue'
 import { Delete } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 import { getMessage, type getMessageRef, getTotalMessage, readMessage } from '@/api/Message'
+import formatTime from '@/utils/formatTime'
 
 // 定义消息项类型
 // Props & Emits
@@ -127,13 +142,6 @@ const handleDelete = (item: getMessageRef) => {
   ElMessage.success('删除成功')
   emit('delete', item.id)
 }
-
-// 时间格式化
-const formatTime = (timeStr: string) => {
-  if (!timeStr) return ''
-  // 简单处理，若需要更精细的格式化（如几天前）可引入 dayjs
-  return timeStr
-}
 </script>
 
 <style lang="scss" scoped>
@@ -207,11 +215,13 @@ const formatTime = (timeStr: string) => {
 
         .top-row {
           display: flex;
-          justify-content: space-between;
-          align-items: center;
+          flex-direction: column; /* 改为纵向排列 */
+          align-items: flex-start; /* 左对齐 */
           margin-bottom: 4px;
+          padding-right: 28px; /* 关键：给右上角的删除按钮留出空间，防止名字太长被挡住 */
 
           .sender-name {
+            width: 100%;
             font-size: 14px;
             color: $my-text-main;
             overflow: hidden;
@@ -222,8 +232,8 @@ const formatTime = (timeStr: string) => {
           .time {
             font-size: 12px;
             color: $my-text-sub;
-            flex-shrink: 0;
-            margin-left: 8px;
+            margin-left: 0; /* 清除之前的左边距 */
+            margin-top: 2px; /* 让时间与名字有一点上下间距 */
           }
         }
 
@@ -236,6 +246,31 @@ const formatTime = (timeStr: string) => {
           -webkit-line-clamp: 2; // 最多显示2行
           -webkit-box-orient: vertical;
           line-height: 1.4;
+        }
+        .bottom-actions {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          margin-top: 6px;
+          font-size: 12px;
+          color: $my-text-sub;
+
+          .edit-tag {
+            color: #e6a23c; // 编辑状态的橙色提示
+          }
+
+          .action-btn {
+            cursor: pointer;
+            transition: color 0.2s;
+
+            &:hover {
+              color: $my-text-main;
+            }
+
+            &.report:hover {
+              color: #f56c6c; // 举报按钮悬浮变红
+            }
+          }
         }
       }
 

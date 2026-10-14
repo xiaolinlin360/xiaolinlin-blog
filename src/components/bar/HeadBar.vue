@@ -10,7 +10,7 @@
     </div>
     <!-- 操作图标与按钮 -->
     <div class="head-bar-right">
-      <el-badge is-dot class="action-item badge-item">
+      <el-badge is-dot class="action-item badge-item" @click="drawerVisible = true">
         <el-icon :size="20" class="action-icon"><Message /></el-icon>
       </el-badge>
 
@@ -30,12 +30,15 @@
       <el-button type="primary" class="logout-btn" @click="handleLogout"> 退出 </el-button>
     </div>
   </header>
+  <!-- 私信抽屉 -->
+  <MessageDrawer v-model="drawerVisible" @delete="handleDelete" />
 </template>
 
 <script setup lang="ts">
 import { ref } from 'vue'
 import { Message, UserFilled, Sunny, Moon } from '@element-plus/icons-vue'
 import { useDark, useToggle } from '@vueuse/core'
+import MessageDrawer from '@/components/MessageDrawer/MessageDrawer.vue'
 // --- Props 定义 (可通过父组件传入) ---
 interface Props {
   title?: string
@@ -53,11 +56,18 @@ const logoUrl = ref<string>(props.initialLogoUrl)
 const avatarUrl = ref<string>(props.initialAvatarUrl)
 const isDark = useDark() // 当前主题是否为暗黑
 const toggleDark = useToggle(isDark) // 切换主题
+const drawerVisible = ref(false) // 私信抽屉是否可见
+// const messageDrawerRef = ref<MessageDrawer>() // 私信抽屉实例引用
 // --- 事件处理 ---
 // 显式声明函数返回类型
 const handleLogout = (): void => {
   // 退出逻辑，例如清空 token 并跳转
   console.log('执行退出登录')
+}
+
+const handleDelete = (id: number) => {
+  // 监听删除私信事件
+  console.log(`删除私信 ${id}`)
 }
 </script>
 
