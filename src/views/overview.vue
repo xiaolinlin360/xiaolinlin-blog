@@ -1,6 +1,7 @@
 <template>
   <div class="overview-page">
     <!-- 顶部：四个统计卡片 -->
+    <head-title title="总览" />
     <gather class="top-gather" />
 
     <!-- 下方左右两列布局 -->
@@ -22,6 +23,7 @@
 import gather from '@/components/overview/gather.vue'
 import datas from '@/components/overview/datas.vue'
 import commonnt from '@/components/overview/commonnt.vue'
+import headTitle from '@/components/bar/HeadTitle.vue'
 </script>
 
 <style scoped lang="scss">

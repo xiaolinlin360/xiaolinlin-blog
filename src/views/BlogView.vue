@@ -1,10 +1,9 @@
 <template>
   <div>
-    <h1>{{ title }}</h1>
+    <headTitle :title="'BlogView'" />
   </div>
 </template>
 <script setup lang="ts">
-import { ref } from 'vue'
-
-const title = ref('BlogView')
+// import { ref } from 'vue'
+import headTitle from '@/components/bar/HeadTitle.vue'
 </script>

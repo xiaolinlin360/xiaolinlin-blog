@@ -25,6 +25,7 @@ declare module 'vue' {
     ElTag: typeof import('element-plus/es')['ElTag']
     Gather: typeof import('./src/components/overview/gather.vue')['default']
     HeadBar: typeof import('./src/components/bar/HeadBar.vue')['default']
+    HeadTitle: typeof import('./src/components/bar/HeadTitle.vue')['default']
     HelloWorld: typeof import('./src/components/HelloWorld.vue')['default']
     MenuBar: typeof import('./src/components/bar/MenuBar.vue')['default']
     MessageDrawer: typeof import('./src/components/MessageDrawer/MessageDrawer.vue')['default']
