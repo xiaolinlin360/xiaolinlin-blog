@@ -20,7 +20,7 @@ interface CommentRes {
   }
 }
 export const getComments = (data: { pageNum: number; pageSize: number }) => {
-  return http.post<any, CommentRes>('/getComment', data)
+  return http.post<any, CommentRes>('/comments/getComment', data)
 }
 
 //获取评论总数
@@ -29,7 +29,7 @@ interface TotalCommentRes {
   data: { total: number }
 }
 export const getTotalComment = () => {
-  return http.post<any, TotalCommentRes>('/getTotalComment')
+  return http.post<any, TotalCommentRes>('/comments/getTotalComment')
 }
 
 // 删除评论
@@ -38,5 +38,5 @@ interface DeleteCommentReq {
   data: { message: string; error: string }
 }
 export const deleteComment = (id: number) => {
-  return http.post<any, DeleteCommentReq>('/deleteComment', { id })
+  return http.post<any, DeleteCommentReq>('/comments/deleteComment', { id })
 }

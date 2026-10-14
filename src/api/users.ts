@@ -6,7 +6,7 @@ export const isRegistered = (data: { id: string }) => {
 
 //注册用户
 export const register = (data: { name: string; password: string }) => {
-  return http.post('/users/register', data)
+  return http.post('/users/insertUser', data)
 }
 
 //登录
@@ -28,5 +28,5 @@ interface LoginRes {
   }
 }
 export const login = (data: { name: string; password: string }) => {
-  return http.post<any, LoginRes>('/login', data)
+  return http.post<any, LoginRes>('/users/loginUser', data)
 }

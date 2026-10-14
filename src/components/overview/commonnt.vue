@@ -49,7 +49,6 @@ import { ref, onMounted } from 'vue'
 import { Delete } from '@element-plus/icons-vue'
 import { getComments, getTotalComment, type Comment, deleteComment } from '@/api/comments'
 
-// 分页参数
 const currentPage = ref(1)
 const pageSize = ref(5)
 let total = ref(0)
