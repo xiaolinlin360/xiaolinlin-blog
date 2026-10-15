@@ -143,21 +143,29 @@ const handleDelete = (item: getMessageRef) => {
   emit('delete', item.id)
 }
 </script>
-
 <style lang="scss" scoped>
-@import '@/style/variables.scss'; // 假设你的全局变量存放路径
+@use '@/style/variables.scss' as *;
 
 .message-drawer {
   :deep(.el-drawer__header) {
     margin-bottom: 0;
     padding: 16px 20px;
-    border-bottom: 1px solid $my-border-color;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05); // 适配暗黑模式，更柔和
     color: $my-text-main;
+    background-color: $my-bg-card;
   }
 
   :deep(.el-drawer__body) {
     padding: 0;
     background-color: $my-bg-page;
+    // 优化滚动条样式（针对暗黑模式）
+    &::-webkit-scrollbar {
+      width: 6px;
+    }
+    &::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 3px;
+    }
   }
 
   .drawer-header {
@@ -165,7 +173,8 @@ const handleDelete = (item: getMessageRef) => {
     align-items: center;
     .title {
       font-size: 16px;
-      font-weight: bold;
+      font-weight: 600;
+      letter-spacing: 1px;
     }
   }
 
@@ -178,32 +187,50 @@ const handleDelete = (item: getMessageRef) => {
       display: flex;
       padding: 16px 20px;
       cursor: pointer;
-      border-bottom: 1px solid $my-border-color;
-      background-color: $my-bg-card;
-      transition: background-color 0.2s;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.03); // 极细的分割线
+      background-color: transparent; // 继承底色，更显轻盈
+      transition: all 0.25s ease;
 
       &:hover {
-        background-color: $my-bg-hover;
+        background-color: rgba(255, 255, 255, 0.04); // 悬浮微亮，替代原有的 $my-bg-hover
 
         .delete-btn {
           opacity: 1;
-          visibility: visible;
+          transform: translateY(-50%) scale(1);
+        }
+
+        .bottom-actions {
+          opacity: 1; // 悬浮时操作栏完全显现
         }
       }
 
+      // 未读消息样式
       &.is-unread {
         .sender-name {
-          font-weight: bold;
-          color: $my-text-main;
+          font-weight: 600;
+          color: #fff; // 未读名字高亮
         }
         .message-text {
-          color: $my-text-main;
+          color: rgba(255, 255, 255, 0.9);
+        }
+        // 增加一个未读小红点提示
+        &::before {
+          content: '';
+          position: absolute;
+          left: 8px;
+          top: 50%;
+          transform: translateY(-50%);
+          width: 6px;
+          height: 6px;
+          background-color: #f56c6c;
+          border-radius: 50%;
         }
       }
 
       .avatar {
         flex-shrink: 0;
-        margin-right: 12px;
+        margin-right: 14px;
+        border: 1px solid rgba(255, 255, 255, 0.1); // 头像加个边框，增加层次感
       }
 
       .content-box {
@@ -212,17 +239,19 @@ const handleDelete = (item: getMessageRef) => {
         display: flex;
         flex-direction: column;
         justify-content: center;
+        padding-right: 24px; // 给右侧删除按钮留出整体空间
 
         .top-row {
           display: flex;
-          flex-direction: column; /* 改为纵向排列 */
-          align-items: flex-start; /* 左对齐 */
-          margin-bottom: 4px;
-          padding-right: 28px; /* 关键：给右上角的删除按钮留出空间，防止名字太长被挡住 */
+          flex-direction: row; /* 改为横向排列 */
+          justify-content: space-between; /* 两端对齐 */
+          align-items: center;
+          margin-bottom: 6px;
 
           .sender-name {
-            width: 100%;
+            max-width: 60%; // 防止名字太长顶掉时间
             font-size: 14px;
+            font-weight: 500;
             color: $my-text-main;
             overflow: hidden;
             text-overflow: ellipsis;
@@ -232,71 +261,89 @@ const handleDelete = (item: getMessageRef) => {
           .time {
             font-size: 12px;
             color: $my-text-sub;
-            margin-left: 0; /* 清除之前的左边距 */
-            margin-top: 2px; /* 让时间与名字有一点上下间距 */
+            flex-shrink: 0;
           }
         }
 
         .message-text {
           font-size: 13px;
           color: $my-text-sub;
+          line-height: 1.5;
           overflow: hidden;
           text-overflow: ellipsis;
           display: -webkit-box;
           -webkit-line-clamp: 2; // 最多显示2行
           -webkit-box-orient: vertical;
-          line-height: 1.4;
+          word-break: break-all;
         }
+
         .bottom-actions {
           display: flex;
           align-items: center;
-          gap: 12px;
-          margin-top: 6px;
+          gap: 16px;
+          margin-top: 8px;
           font-size: 12px;
           color: $my-text-sub;
+          opacity: 0.6; // 默认降低透明度，减少视觉干扰
+          transition: opacity 0.2s;
 
           .edit-tag {
-            color: #e6a23c; // 编辑状态的橙色提示
+            color: #e6a23c;
+            background: rgba(230, 162, 60, 0.1);
+            padding: 1px 6px;
+            border-radius: 4px;
+            font-size: 11px;
           }
 
           .action-btn {
             cursor: pointer;
             transition: color 0.2s;
+            position: relative;
+
+            // 给按钮之间加点分隔小圆点
+            &:not(:last-child)::after {
+              content: '·';
+              position: absolute;
+              right: -10px;
+              color: rgba(255, 255, 255, 0.2);
+            }
 
             &:hover {
-              color: $my-text-main;
+              color: #fff;
             }
 
             &.report:hover {
-              color: #f56c6c; // 举报按钮悬浮变红
+              color: #f56c6c;
             }
           }
         }
       }
 
+      // 优化删除按钮：垂直居中，默认隐藏缩小
       .delete-btn {
         position: absolute;
-        top: 12px;
-        right: 12px;
-        width: 24px;
-        height: 24px;
+        top: 50%;
+        right: 16px;
+        transform: translateY(-50%) scale(0.8);
+        width: 28px;
+        height: 28px;
         display: flex;
         align-items: center;
         justify-content: center;
-        border-radius: 4px;
+        border-radius: 50%; // 圆形按钮
         color: $my-text-sub;
         opacity: 0;
         visibility: hidden;
-        transition: all 0.2s;
-        background-color: rgba(0, 0, 0, 0.05); // 悬浮背景框
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        background-color: rgba(255, 255, 255, 0.08);
 
         &:hover {
-          color: #f56c6c;
-          background-color: rgba(245, 108, 108, 0.1);
+          color: #fff;
+          background-color: #f56c6c; // 直接变红，警示性更强
         }
 
         .el-icon {
-          font-size: 16px;
+          font-size: 14px;
         }
       }
     }
