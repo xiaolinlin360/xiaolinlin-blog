@@ -12,8 +12,8 @@
       </div>
     </template>
 
-    <!-- 消息列表 -->
-    <div class="message-list" v-loading="loading">
+    <!-- 消息列表 ✅ 绑定滚动事件 -->
+    <div class="message-list" v-loading="loading" @scroll="handleScroll">
       <template v-if="messages.length > 0">
         <div
           class="message-item"
@@ -44,6 +44,10 @@
             </div>
           </div>
         </div>
+
+        <!-- ✅ 加载更多的提示（可选，可删） -->
+        <div v-if="loadingMore" class="load-more-tip">加载中...</div>
+        <div v-else-if="!hasMore" class="load-more-tip">没有更多了</div>
       </template>
 
       <!-- 空状态 -->
@@ -59,7 +63,6 @@ import { ElMessage } from 'element-plus'
 import { getMessage, type getMessageRef, getTotalMessage, readMessage } from '@/api/Message'
 import formatTime from '@/utils/formatTime'
 
-// 定义消息项类型
 // Props & Emits
 const props = defineProps<{
   modelValue: boolean
@@ -78,15 +81,19 @@ const visible = computed({
 
 // 状态
 const loading = ref(false)
+const loadingMore = ref(false) // ✅ 加载更多中
+const hasMore = ref(true) // ✅ 是否还有更多
 const messages = ref<getMessageRef[]>([])
 const total = ref(0)
 const pageNum = ref(1)
-const pageSize = ref(20)
+const pageSize = ref(10) // ✅ 默认 10 条
 const defaultAvatar = 'https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png'
 
 // 监听抽屉打开，加载数据
 const handleOpen = async () => {
   if (messages.value.length === 0) {
+    pageNum.value = 1 // ✅ 重置分页
+    hasMore.value = true // ✅ 重置状态
     await fetchTotal()
     await fetchMessages()
   }
@@ -102,18 +109,34 @@ const fetchTotal = async () => {
   }
 }
 
-// 获取列表
-const fetchMessages = async () => {
-  loading.value = true
+// 获取列表（✅ 支持追加）
+const fetchMessages = async (isLoadMore = false) => {
+  if (isLoadMore && (loadingMore.value || !hasMore.value)) return
+
+  isLoadMore ? (loadingMore.value = true) : (loading.value = true)
   try {
     const res = await getMessage({ pageNum: pageNum.value, pageSize: pageSize.value })
-    messages.value = res.data.messages
-    console.log(messages.value)
+    const list = res.data.messages || []
+    messages.value = isLoadMore ? [...messages.value, ...list] : list
+    // 返回条数不足一页，说明没有更多了
+    hasMore.value = list.length >= pageSize.value
   } catch (error) {
     console.error('获取私信列表失败', error)
   } finally {
     loading.value = false
+    loadingMore.value = false
   }
+}
+
+// ✅ 滚动触底加载
+const handleScroll = (e: Event) => {
+  const el = e.target as HTMLElement
+  // 距离底部 50px 内即触发
+  if (el.scrollHeight - el.scrollTop - el.clientHeight > 50) return
+  if (!hasMore.value || loadingMore.value || loading.value) return
+
+  pageNum.value++
+  fetchMessages(true)
 }
 
 // 标记为已读
@@ -128,9 +151,8 @@ const handleRead = async (item: getMessageRef) => {
   }
 }
 
-// 删除私信（接口文档中暂未提供删除接口，预留事件）
+// 删除私信
 const handleDelete = (item: getMessageRef) => {
-  // 如果后端有删除接口，请在这里调用 API
   messages.value = messages.value.filter((msg) => msg.id !== item.id)
   total.value = Math.max(0, total.value - 1)
   ElMessage.success('删除成功')
