@@ -33,8 +33,8 @@
 
             <!-- 渲染 content 和 msg_type -->
             <div class="message-text">
-              <template v-if="item.msg_type === 1">{{ item.content }}</template>
-              <template v-else-if="item.msg_type === 2">[图片消息]</template>
+              <template v-if="item.msg_type === 0">{{ item.content }}</template>
+              <template v-else-if="item.msg_type === 1">[图片消息]</template>
               <template v-else>[其他类型消息]</template>
             </div>
 
@@ -70,7 +70,6 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   (e: 'update:modelValue', value: boolean): void
-  (e: 'delete', id: string): void
 }>()
 
 // 控制抽屉显示
@@ -156,13 +155,18 @@ const handleDelete = (item: getMessageRef) => {
   messages.value = messages.value.filter((msg) => msg.id !== item.id)
   total.value = Math.max(0, total.value - 1)
   ElMessage.success('删除成功')
-  emit('delete', item.id)
 }
 </script>
 <style lang="scss" scoped>
 @use '@/style/variables.scss' as *;
 
 .message-drawer {
+  .load-more-tip {
+    padding: 12px 0;
+    text-align: center;
+    font-size: 12px;
+    color: $my-text-sub;
+  }
   :deep(.el-drawer__header) {
     margin-bottom: 0;
     padding: 16px 20px;
