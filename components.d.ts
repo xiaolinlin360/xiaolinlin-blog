@@ -31,6 +31,7 @@ declare module 'vue' {
     MessageDrawer: typeof import('./src/components/MessageDrawer/MessageDrawer.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
+    Subset: typeof import('./src/components/filesview/subset.vue')['default']
   }
   export interface GlobalDirectives {
     vLoading: typeof import('element-plus/es')['ElLoadingDirective']

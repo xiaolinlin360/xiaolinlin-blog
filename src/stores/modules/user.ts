@@ -11,7 +11,6 @@ export const useUserStore = defineStore(
     //设置token
     const setToken = (newToken: string) => {
       token.value = `Bearer ${newToken}`
-      console.log(token.value)
     }
     //移除token
     const removeToken = () => {

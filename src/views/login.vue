@@ -11,7 +11,7 @@ import { login } from '@/api/users'
 
 onMounted(async () => {
   //登录
-  const res = await login({ name: '博客主', password: '123456' })
+  const res = await login({ name: '博主A', password: 'password123' })
   userStore.setUserData(res.data.user)
   userStore.setToken(res.token)
 })

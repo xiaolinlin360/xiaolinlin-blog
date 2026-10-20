@@ -5,8 +5,8 @@
       <div class="card-header">
         <span class="title">访问量</span>
         <el-radio-group v-model="timeRange" size="small">
-          <el-radio-button label="week">近一周</el-radio-button>
-          <el-radio-button label="month">近一月</el-radio-button>
+          <el-radio-button value="week">近一周</el-radio-button>
+          <el-radio-button value="month">近一月</el-radio-button>
         </el-radio-group>
       </div>
       <div ref="lineChartRef" class="chart-box line-chart"></div>
@@ -17,8 +17,8 @@
       <div class="card-header">
         <span class="title">数据监测</span>
         <el-radio-group v-model="timeRange" size="small">
-          <el-radio-button label="week">近一周</el-radio-button>
-          <el-radio-button label="month">近一月</el-radio-button>
+          <el-radio-button value="week">近一周</el-radio-button>
+          <el-radio-button value="month">近一月</el-radio-button>
         </el-radio-group>
       </div>
 

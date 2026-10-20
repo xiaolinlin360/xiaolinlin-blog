@@ -8,7 +8,7 @@
     <!-- 自定义头部 -->
     <template #header>
       <div class="drawer-header">
-        <span class="title">私信{{ total }}</span>
+        <span class="title">私信：{{ total }}</span>
       </div>
     </template>
 
@@ -20,7 +20,7 @@
           v-for="item in messages"
           :key="item.id"
           :class="{ 'is-unread': !item.is_read }"
-          @click="handleRead(item.id)">
+          @click="handleRead(item)">
           <!-- 头像 -->
           <el-avatar :size="40" :src="item.sender_imgurl || defaultAvatar" class="avatar" />
 
@@ -38,18 +38,10 @@
               <template v-else>[其他类型消息]</template>
             </div>
 
-            <!-- 底部操作栏：说明 & 举报 & 编辑状态!!!!!!!!!!!!!!!!待补充 -->
-            <div class="bottom-actions" @click.stop>
-              <!-- 如果更新时间和创建时间不一致，说明改过，渲染 updated_at 相关说明 -->
-              <span v-if="item.updated_at !== item.created_at" class="edit-tag">已编辑</span>
-              <span class="action-btn">说明</span>
-              <span class="action-btn report">举报</span>
+            <!-- 悬浮删除按钮 -->
+            <div class="delete-btn" @click.stop="handleDelete(item)">
+              <el-icon><Delete /></el-icon>
             </div>
-          </div>
-
-          <!-- 悬浮删除按钮 -->
-          <div class="delete-btn" @click.stop="handleDelete(item)">
-            <el-icon><Delete /></el-icon>
           </div>
         </div>
       </template>
@@ -75,7 +67,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   (e: 'update:modelValue', value: boolean): void
-  (e: 'delete', id: number): void
+  (e: 'delete', id: string): void
 }>()
 
 // 控制抽屉显示
@@ -116,6 +108,7 @@ const fetchMessages = async () => {
   try {
     const res = await getMessage({ pageNum: pageNum.value, pageSize: pageSize.value })
     messages.value = res.data.messages
+    console.log(messages.value)
   } catch (error) {
     console.error('获取私信列表失败', error)
   } finally {
@@ -124,9 +117,10 @@ const fetchMessages = async () => {
 }
 
 // 标记为已读
-const handleRead = async (id: number) => {
+const handleRead = async (item: getMessageRef) => {
   try {
-    const res = await readMessage({ id })
+    const res = await readMessage({ id: item.id })
+    item.is_read = true
     ElMessage.success(res.data.message)
   } catch (error) {
     console.error('标记已读失败', error)

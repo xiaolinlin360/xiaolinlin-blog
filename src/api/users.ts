@@ -28,5 +28,5 @@ interface LoginRes {
   }
 }
 export const login = (data: { name: string; password: string }) => {
-  return http.post<any, LoginRes>('/users/loginUser', data)
+  return http.post<any, LoginRes>('/user/login', data)
 }

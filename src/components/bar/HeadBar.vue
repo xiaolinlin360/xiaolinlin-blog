@@ -39,6 +39,7 @@ import { ref } from 'vue'
 import { Message, UserFilled, Sunny, Moon } from '@element-plus/icons-vue'
 import { useDark, useToggle } from '@vueuse/core'
 import MessageDrawer from '@/components/MessageDrawer/MessageDrawer.vue'
+import { ElMessage } from 'element-plus'
 // --- Props 定义 (可通过父组件传入) ---
 interface Props {
   title?: string
@@ -65,9 +66,10 @@ const handleLogout = (): void => {
   console.log('执行退出登录')
 }
 
-const handleDelete = (id: number) => {
+const handleDelete = (id: string) => {
   // 监听删除私信事件
   console.log(`删除私信 ${id}`)
+  ElMessage.success('删除成功')
 }
 </script>
 

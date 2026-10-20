@@ -61,8 +61,6 @@ const fetchComments = async (page: number) => {
   total.value = totalRes.data.total
   const res = await getComments({ pageNum: page, pageSize: pageSize.value })
   commentList.value = res.data.comments
-  console.dir(total.value)
-  console.dir(res)
 }
 
 // 监听页码变化

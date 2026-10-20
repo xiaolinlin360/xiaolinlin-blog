@@ -23,11 +23,10 @@ defineProps({
 @use '@/style/variables.scss' as *;
 
 .head-title {
+  padding: 0 25px;
+  line-height: 60px;
   display: flex;
-  align-items: center;
   justify-content: space-between;
-  margin-bottom: 16px;
-  padding-bottom: 12px;
   border-bottom: 1px solid $my-border-color;
 }
 

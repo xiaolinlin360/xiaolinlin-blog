@@ -15,7 +15,6 @@ http.interceptors.request.use(
   (config) => {
     // 在发送请求之前做些什么
     const userStore = useUserStore()
-    console.log(userStore.token)
     if (userStore.token) {
       config.headers.Authorization = userStore.token
     }
