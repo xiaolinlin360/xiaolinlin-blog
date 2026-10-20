@@ -64,7 +64,7 @@ const handleMenuClick = (path: string) => {
   width: 220px;
   height: 100%;
   // 替换为：全局卡片背景（白天白/夜间深蓝），或使用 $my-bg-page
-  background-color: $my-bg-card;
+  background-color: $my-bg-page;
   // 补充一根右边框，让侧边栏在视觉上和右侧主内容区有分隔感
   border-right: 1px solid $my-border-color;
   padding: 16px 12px;

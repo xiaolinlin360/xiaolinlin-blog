@@ -75,9 +75,10 @@ const manage = () => {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 12px 20px;
+  padding: 16px 20px;
   border-radius: 8px;
   gap: 20px;
+  background-color: $my-bg-card;
 
   // 左侧滚动区域
   .tabs-scroll {
@@ -100,7 +101,7 @@ const manage = () => {
       border-radius: 20px; // 胶囊形状
       font-size: 14px;
       color: $my-text-sub; // 次要文字颜色
-      background-color: $my-bg-page; // 亮色灰底/暗色深底，刚好作为未选中背景
+      background-color: $my-bg-hover; // 亮色灰底/暗色深底，刚好作为未选中背景
       cursor: pointer;
       white-space: nowrap;
       transition: all 0.2s ease;
@@ -109,6 +110,7 @@ const manage = () => {
       &:hover {
         // 悬浮时稍微加深一点背景，适配亮暗色
         background-color: rgba(144, 147, 153, 0.15);
+        color: #2b5cff;
       }
 
       .count {

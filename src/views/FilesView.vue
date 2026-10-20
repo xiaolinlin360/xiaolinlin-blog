@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="files-view-container">
     <!-- 注意：将 title 修改为截图中的“本地文件” -->
     <headTitle :title="'本地文件'">
       <!-- 默认插槽内容 -->
@@ -33,4 +33,8 @@ const handleSubsetIdChange = (id: string | undefined) => {
 }
 </script>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+.files-view-container {
+  background-color: $my-bg-page;
+}
+</style>

@@ -73,7 +73,7 @@ const handleLogout = (): void => {
   align-items: center;
   height: 60px;
   padding: 0 24px;
-  background-color: $my-bg-page;
+  background-color: $my-bg-card;
   box-shadow: 0 1px 4px rgba(0, 21, 41, 0.08);
   /* 如果希望有图中那种底部蓝色边线，可以加下面这行 */
   /* border-bottom: 2px solid #409eff; */
