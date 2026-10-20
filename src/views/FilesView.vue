@@ -12,18 +12,24 @@
         <el-button type="primary" @click="handleUpload">上传</el-button>
       </div>
     </headTitle>
+    <subset @subset_id="handleSubsetIdChange" />
   </div>
 </template>
 
 <script setup lang="ts">
 import { ElMessage } from 'element-plus'
 import headTitle from '@/components/bar/HeadTitle.vue'
+import subset from '@/components/filesview/subset.vue'
 
 // 处理上传逻辑
 const handleUpload = () => {
   // 这里可以触发一个隐藏的 input[type=file] 点击，或者打开上传弹窗
   // 示例：这里仅做提示，实际业务请替换为真实逻辑
   ElMessage.success('点击了上传按钮，准备上传...')
+}
+// 处理分组切换
+const handleSubsetIdChange = (id: string | undefined) => {
+  console.log('subset_id，拿到的是小分类的id', id)
 }
 </script>
 
