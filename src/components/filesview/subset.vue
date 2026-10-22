@@ -28,17 +28,25 @@
 import { CirclePlus, Setting } from '@element-plus/icons-vue'
 import { ref } from 'vue'
 import { getCategoryIdByPath } from '@/utils/category'
-import { type SubsetRef, getSubset } from '@/api/subsets'
+import {
+  type SubsetRef,
+  getSubset,
+  type addSubsetReq,
+  addSubset,
+  type deleteSubsetReq,
+  deleteSubset,
+} from '@/api/subsets'
 import { useRouter } from 'vue-router'
 const router = useRouter()
 const subsets = ref<SubsetRef[]>([])
 const subset_active = ref<string | undefined>()
+const category = ref<string | undefined>()
 const a = async () => {
-  const category = await getCategoryIdByPath(router.currentRoute.value.path)
-  if (category) {
-    const res = await getSubset({ category_id: category })
+  category.value = await getCategoryIdByPath(router.currentRoute.value.path)
+  if (category.value) {
+    const res = await getSubset({ category_id: category.value })
     subsets.value = res.data
-    console.log(category)
+    console.log(category.value)
   }
 }
 a()
@@ -57,13 +65,16 @@ const handleSelect = (id: string | undefined) => {
 const create = () => {
   console.log('create')
   //新建分组后，刷新当前分类下的分组列表
-  a()
+  addSubset({ category_id: category.value, name: '新分组' }).then(() => {
+    a()
+  })
 }
 
 // 管理分组
 const manage = () => {
   console.log('manage')
   //管理分组后，刷新当前分类下的分组列表
+
   a()
 }
 </script>
