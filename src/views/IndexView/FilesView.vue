@@ -13,6 +13,7 @@
       </div>
     </headTitle>
     <subset @subset_id="handleSubsetIdChange" />
+    <files />
   </div>
 </template>
 
@@ -20,6 +21,7 @@
 import { ElMessage } from 'element-plus'
 import headTitle from '@/components/bar/HeadTitle.vue'
 import subset from '@/components/filesview/subset.vue'
+import files from '@/components/filesview/files.vue'
 
 // 处理上传逻辑
 const handleUpload = () => {
