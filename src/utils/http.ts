@@ -39,6 +39,9 @@ http.interceptors.response.use(
     return Promise.reject(response.data)
   },
   (error) => {
+    if (error.response.status === 400) {
+      return Promise.reject(error)
+    }
     if (error.response.status === 401) {
       console.log(error)
       ElMessage.error('登录过期，请重新登录')

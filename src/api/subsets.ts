@@ -1,5 +1,4 @@
 import http from '@/utils/http'
-import { I } from 'vue-router/dist/index-D7ja2BKs.js'
 
 // 拿到categoryController中的所有子集
 export interface CategoryRef {
@@ -31,15 +30,15 @@ export const getSubset = (data: { category_id: string }) => {
 }
 
 //添加分组
-export interface addSubsetReq {
+export interface insertSubsetReq {
   message: string
 }
-interface addSubsetRef {
-  data: addSubsetReq[]
+interface insertSubsetRef {
+  data: insertSubsetReq[]
   code: number
 }
-export const addSubset = (data: { category_id: string | undefined; name: string }) => {
-  return http.post<any, addSubsetRef>('/subsets/addSubset', data)
+export const insertSubset = (data: { category_id: string | undefined; name: string }) => {
+  return http.post<any, insertSubsetRef>('/subsets/insertSubset', data)
 }
 
 //更新分组

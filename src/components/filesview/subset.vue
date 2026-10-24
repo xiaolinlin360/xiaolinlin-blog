@@ -9,6 +9,9 @@
         :class="{ active: subset_active === item.id }"
         @click="handleSelect(item.id)">
         {{ item.name }}
+        <el-icon v-if="deleteRef" @click="subsetDelete(item.id)" class="delete-icon"
+          ><CloseBold
+        /></el-icon>
       </div>
     </div>
 
@@ -17,36 +20,73 @@
       <el-button link type="primary" class="action-btn" @click="create">
         <el-icon><CirclePlus /></el-icon>新建
       </el-button>
-      <el-button link type="primary" class="action-btn" @click="manage">
+      <el-button
+        link
+        type="primary"
+        class="action-btn"
+        @click="deleteRef = !deleteRef"
+        v-if="!deleteRef">
         <el-icon><Setting /></el-icon>管理分组
       </el-button>
+      <div v-else>
+        <el-button link type="primary" class="action-btn" @click="apisubsetDelete">
+          <el-icon><Setting /></el-icon>确认删除
+        </el-button>
+        <el-button link type="primary" class="action-btn" @click="cancelDelete">
+          <el-icon><Setting /></el-icon>取消
+        </el-button>
+      </div>
     </div>
   </div>
+
+  <el-dialog
+    v-model="dialogVisible"
+    title="新建分组"
+    width="380px"
+    class="custom-create-dialog"
+    align-center
+    :show-close="false"
+    destroy-on-close>
+    <div class="dialog-content">
+      <el-input
+        v-model="inputValue"
+        placeholder="请输入"
+        :maxlength="6"
+        show-word-limit
+        class="custom-input" />
+    </div>
+    <template #footer>
+      <div class="dialog-footer">
+        <el-button class="btn-cancel" @click="dialogVisible = false">取消</el-button>
+        <el-button type="primary" class="btn-confirm" @click="confirmCreate">确认</el-button>
+      </div>
+    </template>
+  </el-dialog>
 </template>
 
 <script setup lang="ts">
-import { CirclePlus, Setting } from '@element-plus/icons-vue'
+import { CirclePlus, Setting, CloseBold } from '@element-plus/icons-vue'
 import { ref } from 'vue'
 import { getCategoryIdByPath } from '@/utils/category'
-import {
-  type SubsetRef,
-  getSubset,
-  type addSubsetReq,
-  addSubset,
-  type deleteSubsetReq,
-  deleteSubset,
-} from '@/api/subsets'
+import { type SubsetRef, getSubset, insertSubset, deleteSubset } from '@/api/subsets'
 import { useRouter } from 'vue-router'
+import { ElMessage } from 'element-plus'
 const router = useRouter()
 const subsets = ref<SubsetRef[]>([])
 const subset_active = ref<string | undefined>()
 const category = ref<string | undefined>()
+const deleteRef = ref<boolean>(false)
+const subsetDeleteArr = ref<string[]>([])
+
+// --- 新增：弹窗相关状态 ---
+const dialogVisible = ref(false)
+const inputValue = ref('')
+
 const a = async () => {
   category.value = await getCategoryIdByPath(router.currentRoute.value.path)
   if (category.value) {
     const res = await getSubset({ category_id: category.value })
     subsets.value = res.data
-    console.log(category.value)
   }
 }
 a()
@@ -63,18 +103,66 @@ const handleSelect = (id: string | undefined) => {
 
 // 新建分组
 const create = () => {
-  console.log('create')
-  //新建分组后，刷新当前分类下的分组列表
-  addSubset({ category_id: category.value, name: '新分组' }).then(() => {
+  inputValue.value = ''
+  dialogVisible.value = true
+}
+const confirmCreate = async () => {
+  if (!inputValue.value.trim()) return
+
+  try {
+    const res = await insertSubset({ category_id: category.value, name: inputValue.value })
+    if (res.code === 200) {
+      ElMessage.success('新建成功')
+    } else {
+      ElMessage.error(res.data[0].message || '新建失败')
+    }
     a()
-  })
+  } catch (error: any) {
+    ElMessage.error(error.response.data.data.message || '新建失败')
+  } finally {
+    dialogVisible.value = false
+  }
 }
 
-// 管理分组
-const manage = () => {
-  console.log('manage')
-  //管理分组后，刷新当前分类下的分组列表
-
+// 删除分组
+const subsetDelete = async (id: string) => {
+  try {
+    subsetDeleteArr.value.push(id)
+    subsets.value = subsets.value.filter((item) => !subsetDeleteArr.value.includes(item.id))
+  } catch (error: any) {
+    ElMessage.error(error.response.data.data.message || '删除失败')
+  }
+}
+const apisubsetDelete = async () => {
+  try {
+    let res: any = null
+    if (subsetDeleteArr.value.length === 0) return ElMessage.warning('请选择要删除的分组')
+    for (let i = 0; i < subsetDeleteArr.value.length; i++) {
+      res = await deleteSubset({ id: subsetDeleteArr.value[i] })
+    }
+    if (res.code === 200) {
+      ElMessage.success('删除成功')
+    } else {
+      ElMessage.error(res.data[0].message || '删除失败')
+    }
+    a()
+  } catch (error: any) {
+    if (error.response.data.code === 400) {
+      console.log(error.response.data.data)
+      ElMessage.error(error.response.data.data.message || '删除失败')
+      a()
+    } else {
+      ElMessage.error(error.response.data.data.message || '删除失败')
+    }
+  } finally {
+    deleteRef.value = false
+    subsetDeleteArr.value = []
+  }
+}
+//取消删除
+const cancelDelete = () => {
+  deleteRef.value = false
+  subsetDeleteArr.value = []
   a()
 }
 </script>
@@ -103,6 +191,11 @@ const manage = () => {
     scrollbar-width: none; /* Firefox */
     &::-webkit-scrollbar {
       display: none; /* Chrome, Safari, Opera */
+    }
+    .delete-icon {
+      margin: 2px 0 0 4px;
+      font-size: 16px;
+      color: $my-text-sub;
     }
 
     .tab-item {
@@ -158,6 +251,79 @@ const manage = () => {
         margin-right: 4px;
         font-size: 16px; // 图标稍微大一点更精致
       }
+    }
+  }
+}
+
+/* --- 新增：弹窗样式定制 --- */
+:deep(.custom-create-dialog) {
+  background-color: $my-bg-card;
+  border-radius: 12px;
+
+  .el-dialog__header {
+    padding: 20px 20px 10px;
+    margin-right: 0;
+
+    .el-dialog__title {
+      font-size: 16px;
+      font-weight: 600;
+      color: $my-text-main;
+    }
+  }
+
+  .el-dialog__body {
+    padding: 10px 20px 20px;
+  }
+
+  .el-dialog__footer {
+    padding: 0 20px 20px;
+  }
+
+  // 输入框定制
+  .custom-input {
+    :deep(.el-input__wrapper) {
+      background-color: $my-bg-hover; // 使用主题的悬浮色/灰底色
+      box-shadow: none; // 去除默认边框
+      border-radius: 8px;
+      padding: 6px 12px;
+
+      &.is-focus {
+        box-shadow: 0 0 0 1px var(--el-color-primary) inset;
+      }
+    }
+
+    :deep(.el-input__inner) {
+      color: $my-text-main;
+      &::placeholder {
+        color: $my-text-sub;
+      }
+    }
+
+    :deep(.el-input__count) {
+      background: transparent; // 让字数统计背景透明
+      color: $my-text-sub;
+    }
+  }
+
+  // 底部按钮区域
+  .dialog-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+
+    .btn-cancel {
+      background-color: $my-bg-hover;
+      border: none;
+      color: $my-text-main;
+
+      &:hover {
+        background-color: rgba(144, 147, 153, 0.15);
+      }
+    }
+
+    .btn-confirm {
+      border-radius: 6px;
+      // 如果觉得 ElementPlus 默认蓝色不够，可以在这里覆盖背景色，比如 background-color: #2b5cff;
     }
   }
 }
