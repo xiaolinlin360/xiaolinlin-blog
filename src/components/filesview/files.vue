@@ -218,7 +218,7 @@ const handleBatchMove = () => {
   justify-content: space-between;
   align-items: center;
   padding: 12px 20px;
-  background-color: $my-bg-hover;
+  background-color: $my-bg-page;
   border-radius: 8px;
   margin-bottom: 20px;
 

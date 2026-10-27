@@ -3,6 +3,12 @@
     <!-- 左侧：可滚动的标签列表 -->
     <div class="tabs-scroll">
       <div
+        class="tab-item"
+        :class="{ active: subset_active === undefined }"
+        @click="handleSelect(undefined)">
+        全部
+      </div>
+      <div
         v-for="item in subsets"
         :key="item.name"
         class="tab-item"

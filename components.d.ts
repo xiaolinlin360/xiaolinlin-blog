@@ -11,6 +11,8 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
+    Article: typeof import('./src/components/articles/article.vue')['default']
+    ArticleItem: typeof import('./src/components/articles/article-item.vue')['default']
     Commonnt: typeof import('./src/components/overview/commonnt.vue')['default']
     Datas: typeof import('./src/components/overview/datas.vue')['default']
     ElAvatar: typeof import('element-plus/es')['ElAvatar']
