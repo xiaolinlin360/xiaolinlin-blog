@@ -32,8 +32,13 @@
           <el-button link type="primary" size="small">管理标签</el-button>
         </div>
         <div class="tag-list">
-          <el-tag v-for="tag in tags" :key="tag" class="custom-tag" type="info" effect="plain">
-            {{ tag }}
+          <el-tag
+            v-for="label in labels"
+            :key="label"
+            class="custom-tag"
+            type="info"
+            effect="plain">
+            {{ label.label_name }}
           </el-tag>
         </div>
       </div>
@@ -47,6 +52,7 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import ArticleItem from './article-item.vue'
 import { getArticle, getTotalArticle, deleteArticle } from '@/api/blog'
 import type { Article } from '@/api/blog'
+import { getLabels, type Labels } from '@/api/labels'
 
 const props = defineProps<{
   subsetId: string | undefined
@@ -57,7 +63,16 @@ const loading = ref(false)
 const pageNum = ref(1)
 const pageSize = ref(4) // 按照你截图的数量，一页大概4-5个
 const total = ref(0)
-const tags = ref(['标签', '标签', '标签', '标签', '标签', '标签', '标签'])
+const labels = ref<Labels[]>([])
+//获取标签
+const fetchLabels = async () => {
+  try {
+    const res = await getLabels()
+    labels.value = res.data.labels
+  } catch (error) {
+    console.error('获取标签失败', error)
+  }
+}
 
 // 获取文章数据
 const fetchData = async () => {
@@ -104,6 +119,7 @@ onMounted(() => {
   if (!props.subsetId || props.subsetId === undefined) {
     fetchData()
     fetchTotal()
+    fetchLabels()
   }
 })
 

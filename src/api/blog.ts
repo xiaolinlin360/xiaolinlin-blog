@@ -13,6 +13,10 @@ export interface Article {
   content: string
   created_at: string
   username_name: string
+  labels: {
+    id: string
+    label_name: string
+  }[]
 }
 // data 层
 interface ArticleData {
