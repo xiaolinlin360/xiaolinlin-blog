@@ -68,7 +68,10 @@ const labels = ref<Labels[]>([])
 const fetchLabels = async () => {
   try {
     const res = await getLabels()
-    labels.value = res.data.labels
+    console.log(res.data)
+
+    labels.value = res.data
+    console.log(labels.value)
   } catch (error) {
     console.error('获取标签失败', error)
   }

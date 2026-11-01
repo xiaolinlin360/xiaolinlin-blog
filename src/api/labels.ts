@@ -5,9 +5,7 @@ export interface Labels {
   created_at: string
 }
 interface getLabelsRef {
-  data: {
-    labels: Labels[]
-  }
+  data: Labels[]
   code: number
 }
 export const getLabels = () => {
