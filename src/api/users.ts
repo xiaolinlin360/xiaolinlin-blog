@@ -1,12 +1,12 @@
 import http from '@/utils/http'
 //验证是否注册
 export const isRegistered = (data: { id: string }) => {
-  return http.post('/users/isRegistered', data)
+  return http.post('/user/isRegistered', data)
 }
 
 //注册用户
 export const register = (data: { name: string; password: string }) => {
-  return http.post('/users/insertUser', data)
+  return http.post('/user/insertUser', data)
 }
 
 //登录

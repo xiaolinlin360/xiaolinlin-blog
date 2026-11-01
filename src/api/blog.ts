@@ -47,7 +47,7 @@ export const getTotalArticle = () => {
   return http.post<any, TotalBlogRes>('/article/getTotalArticle')
 }
 
-//修改博客文章
+//修改博客文章发布状态
 interface UpdateArticleReq {
   code: number
   data: { message: string }
