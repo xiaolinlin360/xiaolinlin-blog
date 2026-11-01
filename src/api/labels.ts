@@ -9,5 +9,5 @@ interface getLabelsRef {
   code: number
 }
 export const getLabels = () => {
-  return http.post<any, getLabelsRef>('/label/getLabels')
+  return http.post<any, getLabelsRef>('/labels/getLabels')
 }

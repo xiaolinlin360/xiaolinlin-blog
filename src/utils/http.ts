@@ -40,13 +40,13 @@ http.interceptors.response.use(
   },
   (error) => {
     if (error.response?.status === 400) {
-      return Promise.reject(error.response.data.data?.message)
+      return Promise.reject(error)
     }
     if (error.response?.status === 401) {
       console.log(error)
       ElMessage.error('登录过期，请重新登录')
       router.push('/login')
-      return Promise.reject(error.response.data.data?.message)
+      return Promise.reject(error)
     }
     ElMessage.error(error.message || '请求失败')
     // 超出 2xx 范围的状态码都会触发该函数。
