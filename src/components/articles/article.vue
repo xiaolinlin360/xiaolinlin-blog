@@ -68,10 +68,7 @@ const labels = ref<Labels[]>([])
 const fetchLabels = async () => {
   try {
     const res = await getLabels()
-    console.log(res.data)
-
     labels.value = res.data
-    console.log(labels.value)
   } catch (error) {
     console.error('获取标签失败', error)
   }
@@ -82,13 +79,15 @@ const fetchData = async () => {
   loading.value = true
   try {
     // 如果你要根据分类查，这里可以把 props.subsetId 传给后端
-    // 比如: data: { pageNum: pageNum.value, pageSize: pageSize.value, subset_id: props.subsetId }
     const res = await getArticle({
       pageNum: pageNum.value,
       pageSize: pageSize.value,
       subset_id: props.subsetId ? props.subsetId : undefined,
     })
+    console.log(res.data.articles)
+
     articles.value = res.data.articles || []
+    console.log(articles.value)
   } catch (error) {
     console.error('获取文章列表失败', error)
   } finally {

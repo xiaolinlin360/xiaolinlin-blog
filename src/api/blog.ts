@@ -1,41 +1,49 @@
 import http from '@/utils/http'
 
-//获取博客列表// 单篇文章
+/** 标签 */
+export interface Label {
+  id: string
+  label_name: string
+}
+
+/** 单篇文章主体（对应 article 表） */
 export interface Article {
   id: string
-  user_id: string
-  subset_id: string
-  title: string
-  introduce: string
-  file_id: string | null
-  cover_file_id: string
   state: boolean
+  title: string
   content: string
+  user_id: string
+  url: string
+  file_urls: string[]
+  introduce: string
+  subset_id: string
   created_at: string
   username_name: string
-  labels: {
-    id: string
-    label_name: string
-  }[]
+  labels: Label[]
 }
-// data 层
-interface ArticleData {
+
+/** data 层 */
+export interface ArticleListData {
   articles: Article[]
   pageSize: number
   pageNum: number
 }
-// 最外层
-interface Blog {
-  data: ArticleData
+
+/** 最外层响应 */
+export interface BlogResponse {
+  data: ArticleListData
   code: number
   message?: string
 }
-export const getArticle = (data: {
+
+export interface ArticleQuery {
   pageNum: number
   pageSize: number
-  subset_id: string | undefined
-}) => {
-  return http.post<any, Blog>('/article/getArticle', data)
+  subset_id?: string
+}
+
+export const getArticle = (data: ArticleQuery) => {
+  return http.post<any, BlogResponse>('/article/getArticle', data)
 }
 
 //获取博客文章总数
