@@ -36,10 +36,10 @@
       </div>
     </div>
 
-    <!-- 文件网格列表 -->
+    <!-- 文件网格列表 (去除 currentPageFiles，直接使用 files) -->
     <div class="file-grid">
       <div
-        v-for="file in currentPageFiles"
+        v-for="file in files"
         :key="file.id"
         class="file-card"
         :class="{ 'is-selected': selectedIds.includes(file.id) }"
@@ -66,9 +66,9 @@
           </div>
         </div>
 
-        <!-- 文件名 -->
-        <div class="file-name" :title="file.name">
-          {{ file.name }}
+        <!-- 文件名 (根据接口字段名改为 file_name) -->
+        <div class="file-name" :title="file.file_name">
+          {{ file.file_name }}
         </div>
       </div>
     </div>
@@ -76,12 +76,12 @@
     <!-- 空状态 -->
     <el-empty v-if="files.length === 0" description="暂无数据" />
 
-    <!-- 分页 -->
-    <div class="pagination-wrapper" v-if="files.length > 0">
+    <!-- 分页 (total 改为后端的 total) -->
+    <div class="pagination-wrapper" v-if="total > 0">
       <el-pagination
         v-model:current-page="currentPage"
         v-model:page-size="pageSize"
-        :total="files.length"
+        :total="total"
         :page-sizes="[10, 20, 50]"
         layout="prev, pager, next, jumper"
         background />
@@ -90,51 +90,61 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { Delete, Switch } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
+// 导入真实的接口和类型 (假设文件路径为 @/api/files)
+import { getFiles, getTotalFile } from '@/api/files'
+import type { FileItem } from '@/api/files'
 
-// 类型定义
-interface FileItem {
-  id: string
-  name: string
-  url: string
-}
-
-// 模拟数据 (实际使用时替换为从后端获取)
-const files = ref<FileItem[]>([
-  { id: '1', name: '地联传入人石.jpeg', url: 'https://picsum.photos/400/300?random=1' },
-  { id: '2', name: '究志以火或看长别想.jpeg', url: 'https://picsum.photos/400/300?random=2' },
-  { id: '3', name: '展关张.jpeg', url: 'https://picsum.photos/400/300?random=3' },
-  { id: '4', name: '克集起单当况王光.jpeg', url: 'https://picsum.photos/400/300?random=4' },
-  { id: '5', name: '青团品器志行海不义观.jpeg', url: 'https://picsum.photos/400/300?random=5' },
-  { id: '6', name: '克之定统且五局质各.jpeg', url: 'https://picsum.photos/400/300?random=6' },
-  { id: '7', name: '信角低土算.jpeg', url: 'https://picsum.photos/400/300?random=7' },
-  { id: '8', name: '水造验可表机.jpeg', url: 'https://picsum.photos/400/300?random=8' },
-])
+// 数据状态
+const files = ref<FileItem[]>([])
+const total = ref(0)
 
 // 选中的 ID 列表
 const selectedIds = ref<string[]>([])
 
 // 分页逻辑
 const currentPage = ref(1)
-const pageSize = ref(14)
+const pageSize = ref(10) // 默认值改为10，与 page-sizes 匹配
 
-// 计算当前页显示的数据
-const currentPageFiles = computed(() => {
-  const start = (currentPage.value - 1) * pageSize.value
-  const end = start + pageSize.value
-  return files.value.slice(start, end)
+// 获取数据方法
+const fetchFiles = async () => {
+  try {
+    // 1. 获取文件列表
+    const res = await getFiles({
+      pageNum: currentPage.value,
+      pageSize: pageSize.value,
+    })
+    files.value = res.data.files || []
+
+    // 清空选择，防止跨页保留
+    selectedIds.value = []
+
+    // 2. 获取总数
+    const totalRes = await getTotalFile()
+    total.value = totalRes.data.total || 0
+  } catch (error) {
+    console.error('获取文件失败', error)
+  }
+}
+
+// 组件挂载时初始化数据
+onMounted(() => {
+  fetchFiles()
 })
 
-// 全选相关逻辑
+// 监听页码和页大小变化，重新请求数据
+watch([currentPage, pageSize], () => {
+  fetchFiles()
+})
+
+// 全选相关逻辑 (针对当前页)
 const isAllSelected = computed({
   get: () => {
-    return currentPageFiles.value.length > 0 && selectedIds.value.length === files.value.length
+    return files.value.length > 0 && selectedIds.value.length === files.value.length
   },
-  set: () => {
-    // 由 handleSelectAll 处理
-  },
+  set: () => {},
 })
 
 const isIndeterminate = computed(() => {
@@ -165,16 +175,24 @@ const clearSelection = () => {
   selectedIds.value = []
 }
 
+/*
+
+
+
+
+后端分页下，删除成功后应该重新调用 fetchFiles() 刷新列表
+*/
+
 // 单个删除 (悬浮按钮触发)
 const handleSingleDelete = (file: FileItem) => {
-  ElMessageBox.confirm(`确定要删除 "${file.name}" 吗？`, '提示', {
+  ElMessageBox.confirm(`确定要删除 "${file.file_name}" 吗？`, '提示', {
     type: 'warning',
   })
     .then(() => {
       files.value = files.value.filter((f) => f.id !== file.id)
-      // 从选中列表中移除
+      total.value -= 1 // 总数减一
       selectedIds.value = selectedIds.value.filter((id) => id !== file.id)
-      ElMessage.success('删除成功')
+      ElMessage.success('删除成功(前端模拟)')
     })
     .catch(() => {})
 }
@@ -186,16 +204,19 @@ const handleBatchDelete = () => {
     type: 'warning',
   })
     .then(() => {
+      // 记录删除数量
+      const deleteCount = selectedIds.value.length
       files.value = files.value.filter((f) => !selectedIds.value.includes(f.id))
+      total.value -= deleteCount // 总数扣除
       selectedIds.value = []
-      ElMessage.success('批量删除成功')
+      ElMessage.success('批量删除成功(前端模拟)')
     })
     .catch(() => {})
 }
 
 // 单个移动 / 批量移动 (占位方法)
 const handleSingleMove = (file: FileItem) => {
-  ElMessage.info(`准备移动文件: ${file.name}`)
+  ElMessage.info(`准备移动文件: ${file.file_name}`)
 }
 const handleBatchMove = () => {
   ElMessage.info(`准备移动 ${selectedIds.value.length} 个文件`)
@@ -203,6 +224,7 @@ const handleBatchMove = () => {
 </script>
 
 <style lang="scss" scoped>
+/* 样式保持原样，未作任何修改 */
 @use '@/style/variables.scss' as *;
 
 .files-container {
@@ -267,12 +289,10 @@ const handleBatchMove = () => {
 /* 网格布局 */
 .file-grid {
   display: grid;
-  /* 自动填充，最小宽度160px，最大占据剩余空间 */
   grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
   gap: 24px;
   margin-bottom: 30px;
 
-  /* 文件卡片 */
   .file-card {
     position: relative;
     display: flex;
@@ -284,21 +304,19 @@ const handleBatchMove = () => {
     transition: all 0.2s ease;
     cursor: pointer;
 
-    /* 选中态样式 */
     &.is-selected {
       background-color: var(--el-color-primary-light-9);
       border-color: var(--el-color-primary);
 
       .checkbox-wrapper {
-        opacity: 1; /* 选中时强制显示复选框 */
+        opacity: 1;
       }
     }
 
-    /* 图片包裹区 */
     .image-wrapper {
       position: relative;
       width: 100%;
-      height: 140px; /* 固定高度，防止图片长短不一导致页面跳动 */
+      height: 140px;
       display: flex;
       justify-content: center;
       align-items: center;
@@ -309,7 +327,7 @@ const handleBatchMove = () => {
       .preview-img {
         width: 100%;
         height: 100%;
-        object-fit: contain; /* 图片完整显示在框内 */
+        object-fit: contain;
       }
 
       .image-error {
@@ -317,30 +335,28 @@ const handleBatchMove = () => {
         color: $my-text-sub;
       }
 
-      /* 左上角复选框 */
       .checkbox-wrapper {
         position: absolute;
         top: 8px;
         left: 8px;
         z-index: 2;
-        opacity: 0; /* 默认隐藏 */
+        opacity: 0;
         transition: opacity 0.2s;
       }
 
-      /* 底部悬浮操作栏 */
       .hover-actions {
         position: absolute;
         bottom: 0;
         left: 0;
         width: 100%;
         height: 32px;
-        background: rgba(0, 0, 0, 0.5); /* 半透明黑底 */
+        background: rgba(0, 0, 0, 0.5);
         backdrop-filter: blur(2px);
         display: flex;
         justify-content: center;
         align-items: center;
         gap: 20px;
-        opacity: 0; /* 默认隐藏 */
+        opacity: 0;
         transition: opacity 0.2s;
 
         .hover-icon {
@@ -355,7 +371,6 @@ const handleBatchMove = () => {
       }
     }
 
-    /* 鼠标悬浮时显示复选框和操作栏 */
     &:hover {
       background-color: $my-bg-hover;
 
@@ -365,14 +380,12 @@ const handleBatchMove = () => {
       }
     }
 
-    /* 文件名 */
     .file-name {
       width: 100%;
       text-align: center;
       font-size: 13px;
       color: $my-text-main;
       line-height: 1.4;
-      /* 单行截断 */
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -380,7 +393,6 @@ const handleBatchMove = () => {
   }
 }
 
-/* 分页 */
 .pagination-wrapper {
   display: flex;
   justify-content: flex-end;
