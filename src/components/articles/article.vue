@@ -30,9 +30,14 @@
         <div class="sidebar-header">
           <span class="title">标签</span>
           <!-- 1. 点击打开抽屉 -->
-          <el-button link type="primary" size="small" @click="drawerVisible = true"
-            >管理标签</el-button
-          >
+          <div>
+            <el-button link type="primary" size="small" @click="drawerVisible = true"
+              >管理标签</el-button
+            >
+            <el-button link type="primary" size="small" @click="dialogVisible = true"
+              >添加标签</el-button
+            >
+          </div>
         </div>
         <div class="tag-list">
           <el-tag
@@ -41,12 +46,36 @@
             class="custom-tag"
             type="info"
             effect="plain"
-            @click="handleCopyLabelId(label.id)">
+            @click="handleCopyLabelId(label.id)"
+            @keyup.enter="handleCopyLabelId(label.id)">
             {{ label.label_name }}
           </el-tag>
         </div>
       </div>
     </div>
+    <el-dialog
+      v-model="dialogVisible"
+      title="添加标签"
+      width="380px"
+      class="custom-create-dialog"
+      align-center
+      :show-close="false"
+      destroy-on-close>
+      <div class="dialog-content">
+        <el-input
+          v-model="inputValue"
+          placeholder="请输入"
+          :maxlength="16"
+          show-word-limit
+          class="custom-input" />
+      </div>
+      <template #footer>
+        <div class="dialog-footer">
+          <el-button class="btn-cancel" @click="dialogVisible = false">取消</el-button>
+          <el-button type="primary" class="btn-confirm" @click="confirmAddLabel">确认</el-button>
+        </div>
+      </template>
+    </el-dialog>
     <DrawerLabel v-model="drawerVisible" @refresh="fetchLabels" :originalLabels="labels" />
   </div>
 </template>
@@ -57,7 +86,7 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import ArticleItem from './article-item.vue'
 import { getArticle, getTotalArticle, deleteArticle } from '@/api/blog'
 import type { Article } from '@/api/blog'
-import { getLabels, type Labels } from '@/api/labels'
+import { getLabels, type Labels, insertLabels } from '@/api/labels'
 import DrawerLabel from './drawer-label.vue'
 const drawerVisible = ref(false)
 
@@ -71,6 +100,8 @@ const pageNum = ref(1)
 const pageSize = ref(4) // 按照你截图的数量，一页大概4-5个
 const total = ref(0)
 const labels = ref<Labels[]>([])
+const dialogVisible = ref(false)
+const inputValue = ref('')
 
 //获取标签
 const fetchLabels = async () => {
@@ -113,6 +144,25 @@ const fetchTotal = async () => {
   }
 }
 
+// 新增：确认添加标签
+const confirmAddLabel = async () => {
+  if (!inputValue.value) {
+    ElMessage.error('请输入标签名称')
+    return
+  }
+  try {
+    await insertLabels({
+      label_name: inputValue.value,
+    })
+    ElMessage.success('添加成功')
+    dialogVisible.value = false
+    fetchLabels()
+  } catch (error) {
+    console.error('添加标签失败', error)
+  } finally {
+    inputValue.value = ''
+  }
+}
 // 如果父组件传了分类ID，监听变化重新拉取数据
 watch(
   () => props.subsetId,
