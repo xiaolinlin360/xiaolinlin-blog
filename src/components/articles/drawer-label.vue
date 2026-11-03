@@ -157,8 +157,9 @@ const handleRemove = (label: Labels) => {
   editLabels.value = editLabels.value.filter((i) => i.id !== label.id)
   if (deletedLabels.value.some((i) => i.id === label.id)) {
     ElMessage.warning('标签已选择')
+  } else {
+    deletedLabels.value.push(label)
   }
-  deletedLabels.value.push(label)
   console.log(deletedLabels.value)
 }
 
@@ -204,11 +205,7 @@ const handleConfirm = async () => {
     const updateQueue: Promise<any>[] = []
     // 1. 处理删除逻辑
     for (const label of deletedLabels.value) {
-      updateQueue.push(
-        deleteLabels({ id: label.id }).catch((e) =>
-          console.error(`删除标签${label.label_name}失败`, e)
-        )
-      )
+      updateQueue.push(deleteLabels({ id: label.id }))
     }
     // 2. 处理更新逻辑（比较原数据）
     for (const label of editLabels.value) {
