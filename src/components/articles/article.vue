@@ -24,25 +24,30 @@
       </div>
     </div>
 
-    <!-- 右侧：标签侧边栏 (暂用静态数据展示) -->
+    <!-- 右侧：标签侧边栏 -->
     <div class="sidebar">
       <div class="sidebar-card">
         <div class="sidebar-header">
           <span class="title">标签</span>
-          <el-button link type="primary" size="small">管理标签</el-button>
+          <!-- 1. 点击打开抽屉 -->
+          <el-button link type="primary" size="small" @click="drawerVisible = true"
+            >管理标签</el-button
+          >
         </div>
         <div class="tag-list">
           <el-tag
             v-for="label in labels"
-            :key="label"
+            :key="label.id"
             class="custom-tag"
             type="info"
-            effect="plain">
+            effect="plain"
+            @click="handleCopyLabelId(label.id)">
             {{ label.label_name }}
           </el-tag>
         </div>
       </div>
     </div>
+    <DrawerLabel v-model="drawerVisible" @refresh="fetchLabels" :originalLabels="labels" />
   </div>
 </template>
 
@@ -53,6 +58,8 @@ import ArticleItem from './article-item.vue'
 import { getArticle, getTotalArticle, deleteArticle } from '@/api/blog'
 import type { Article } from '@/api/blog'
 import { getLabels, type Labels } from '@/api/labels'
+import DrawerLabel from './drawer-label.vue'
+const drawerVisible = ref(false)
 
 const props = defineProps<{
   subsetId: string | undefined
@@ -64,6 +71,7 @@ const pageNum = ref(1)
 const pageSize = ref(4) // 按照你截图的数量，一页大概4-5个
 const total = ref(0)
 const labels = ref<Labels[]>([])
+
 //获取标签
 const fetchLabels = async () => {
   try {
@@ -154,6 +162,17 @@ const handleDelete = async (id: string) => {
     fetchTotal()
   } catch (error) {
     console.error('删除失败', error)
+  }
+}
+
+// 新增：点击标签复制 ID
+const handleCopyLabelId = async (id: string) => {
+  if (!id) return
+  try {
+    await navigator.clipboard.writeText(id)
+    ElMessage.success('已复制标签 ID')
+  } catch {
+    ElMessage.error('复制失败，请检查浏览器权限')
   }
 }
 </script>

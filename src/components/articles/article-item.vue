@@ -19,6 +19,19 @@
       <!-- 简介 -->
       <p class="introduce">{{ article.introduce }}</p>
 
+      <!-- 标签列表 -->
+      <div class="tag-list" v-if="article.labels?.length">
+        <el-tag
+          v-for="label in article.labels"
+          :key="label.id"
+          class="custom-tag"
+          type="info"
+          effect="plain"
+          @click="copyLabelId(label.id)">
+          {{ label.label_name }}
+        </el-tag>
+      </div>
+
       <!-- 底部信息栏 -->
       <div class="meta-info">
         <div class="left-meta">
@@ -110,6 +123,16 @@ const copyAttachments = async () => {
     ElMessage.error('复制失败，请检查浏览器权限')
   }
 }
+
+// 复制标签 ID
+const copyLabelId = async (id: string) => {
+  try {
+    await navigator.clipboard.writeText(id)
+    ElMessage.success('已复制标签 ID')
+  } catch {
+    ElMessage.error('复制失败，请检查浏览器权限')
+  }
+}
 </script>
 
 <style lang="scss" scoped>
@@ -183,6 +206,27 @@ const copyAttachments = async () => {
       -webkit-line-clamp: 2;
       line-clamp: 2;
       overflow: hidden;
+    }
+
+    // 标签列表样式
+    .tag-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 12px;
+
+      .custom-tag {
+        background-color: $my-bg-hover;
+        border-color: transparent;
+        color: $my-text-sub;
+        cursor: pointer;
+        transition: all 0.2s;
+
+        &:hover {
+          color: var(--el-color-primary);
+          background-color: var(--el-color-primary-light-9);
+        }
+      }
     }
 
     // 底部信息
