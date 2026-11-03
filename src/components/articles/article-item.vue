@@ -34,6 +34,13 @@
             <span class="stat-item"
               ><el-icon><ChatDotRound /></el-icon> 0</span
             >
+            <!-- 附件按钮：点击复制 file_urls 原始数组 -->
+            <span
+              v-if="article.file_urls?.length"
+              class="stat-item attachment"
+              @click="copyAttachments">
+              <el-icon><Paperclip /></el-icon> {{ article.file_urls.length }}
+            </span>
           </div>
         </div>
 
@@ -57,7 +64,16 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import { Picture, View, Star, ChatDotRound, EditPen, Delete } from '@element-plus/icons-vue'
+import {
+  Picture,
+  View,
+  Star,
+  ChatDotRound,
+  EditPen,
+  Delete,
+  Paperclip,
+} from '@element-plus/icons-vue'
+import { ElMessage } from 'element-plus'
 import type { Article } from '@/api/blog' // 引入你定义的接口
 
 const props = defineProps<{
@@ -81,6 +97,18 @@ const coverUrl = computed(() => {
 const formatDate = (timeStr: string) => {
   if (!timeStr) return ''
   return timeStr.split('T')[0] // 只取 YYYY-MM-DD 部分
+}
+
+// 复制附件原始数组
+const copyAttachments = async () => {
+  const urls = props.article.file_urls
+  if (!urls?.length) return
+  try {
+    await navigator.clipboard.writeText(JSON.stringify(urls))
+    ElMessage.success(`已复制 ${urls.length} 个附件链接`)
+  } catch {
+    ElMessage.error('复制失败，请检查浏览器权限')
+  }
 }
 </script>
 
@@ -181,6 +209,16 @@ const formatDate = (timeStr: string) => {
 
             .el-icon {
               font-size: 14px;
+            }
+          }
+
+          // 附件按钮交互反馈
+          .attachment {
+            cursor: pointer;
+            transition: color 0.2s;
+
+            &:hover {
+              color: var(--el-color-primary);
             }
           }
         }
