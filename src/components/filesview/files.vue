@@ -22,24 +22,38 @@
         </el-button>
       </div>
 
-      <div class="right-actions" v-if="selectedIds.length > 0">
-        <el-tooltip content="删除" placement="top">
-          <el-icon class="action-icon delete-icon" @click="handleBatchDelete">
-            <Delete />
-          </el-icon>
-        </el-tooltip>
-        <el-tooltip content="移动" placement="top">
-          <el-icon class="action-icon" @click="handleBatchMove">
-            <Switch />
-          </el-icon>
-        </el-tooltip>
+      <div class="right-actions">
+        <!-- 按 id / id 数组 搜索 -->
+        <el-input
+          v-model="searchKeyword"
+          class="search-input"
+          placeholder="输入文件ID，多个用逗号分隔"
+          clearable
+          @keyup.enter="handleSearch"
+          @clear="handleSearch" />
+        <el-button type="primary" @click="handleSearch">搜索</el-button>
+
+        <template v-if="selectedIds.length > 0">
+          <el-tooltip content="下载" placement="top">
+            <el-icon class="action-icon" @click="handleBatchDownload">
+              <Download />
+            </el-icon>
+          </el-tooltip>
+        </template>
       </div>
     </div>
 
-    <!-- 文件网格列表 (去除 currentPageFiles，直接使用 files) -->
+    <!-- 分类栏目：全部 / 文章附件 / 其他 -->
+    <el-radio-group v-model="activeCategory" class="category-tabs">
+      <el-radio-button label="all">全部</el-radio-button>
+      <el-radio-button label="article">文章附件</el-radio-button>
+      <el-radio-button label="other">其他</el-radio-button>
+    </el-radio-group>
+
+    <!-- 文件网格列表 -->
     <div class="file-grid">
       <div
-        v-for="file in files"
+        v-for="file in filteredFiles"
         :key="file.id"
         class="file-card"
         :class="{ 'is-selected': selectedIds.includes(file.id) }"
@@ -52,7 +66,7 @@
             </template>
           </el-image>
 
-          <!-- 左上角复选框 (选中时或悬浮时显示) -->
+          <!-- 左上角复选框 -->
           <div class="checkbox-wrapper" @click.stop>
             <el-checkbox
               :model-value="selectedIds.includes(file.id)"
@@ -61,12 +75,11 @@
 
           <!-- 底部悬浮操作栏 -->
           <div class="hover-actions" @click.stop>
-            <el-icon class="hover-icon" @click="handleSingleDelete(file)"><Delete /></el-icon>
-            <el-icon class="hover-icon" @click="handleSingleMove(file)"><Switch /></el-icon>
+            <el-icon class="hover-icon" @click="handleSingleDownload(file)"><Download /></el-icon>
           </div>
         </div>
 
-        <!-- 文件名 (根据接口字段名改为 file_name) -->
+        <!-- 文件名 -->
         <div class="file-name" :title="file.file_name">
           {{ file.file_name }}
         </div>
@@ -74,9 +87,9 @@
     </div>
 
     <!-- 空状态 -->
-    <el-empty v-if="files.length === 0" description="暂无数据" />
+    <el-empty v-if="filteredFiles.length === 0" description="暂无数据" />
 
-    <!-- 分页 (total 改为后端的 total) -->
+    <!-- 分页 -->
     <div class="pagination-wrapper" v-if="total > 0">
       <el-pagination
         v-model:current-page="currentPage"
@@ -91,9 +104,8 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from 'vue'
-import { Delete, Switch } from '@element-plus/icons-vue'
-import { ElMessage, ElMessageBox } from 'element-plus'
-// 导入真实的接口和类型 (假设文件路径为 @/api/files)
+import { Download } from '@element-plus/icons-vue'
+import { ElMessage } from 'element-plus'
 import { getFiles, getTotalFile } from '@/api/files'
 import type { FileItem } from '@/api/files'
 
@@ -106,19 +118,40 @@ const selectedIds = ref<string[]>([])
 
 // 分页逻辑
 const currentPage = ref(1)
-const pageSize = ref(10) // 默认值改为10，与 page-sizes 匹配
+const pageSize = ref(10)
+
+// 搜索：支持单个 id 或 id 数组
+const searchKeyword = ref('')
+const searchIds = ref<string[]>([])
+
+// 分类：全部 / 文章附件 / 其他
+const activeCategory = ref<'all' | 'article' | 'other'>('all')
+
+// 根据 article_id 分类过滤（后端未提供分类参数，故前端过滤当前页数据）
+const filteredFiles = computed(() => {
+  switch (activeCategory.value) {
+    case 'article':
+      // article_id 不为 null / '' 视为文章附件
+      return files.value.filter((f) => f.article_id && f.article_id !== '')
+    case 'other':
+      return files.value.filter((f) => !f.article_id || f.article_id === '')
+    default:
+      return files.value
+  }
+})
 
 // 获取数据方法
 const fetchFiles = async () => {
   try {
-    // 1. 获取文件列表
+    // 1. 获取文件列表（搜索时通过 file_urls 传 id 数组进行过滤）
     const res = await getFiles({
       pageNum: currentPage.value,
       pageSize: pageSize.value,
+      ...(searchIds.value.length ? { file_urls: searchIds.value } : {}),
     })
     files.value = res.data.files || []
 
-    // 清空选择，防止跨页保留
+    // 清空选择，防止跨页/跨次查询保留
     selectedIds.value = []
 
     // 2. 获取总数
@@ -129,38 +162,47 @@ const fetchFiles = async () => {
   }
 }
 
-// 组件挂载时初始化数据
 onMounted(() => {
   fetchFiles()
 })
 
-// 监听页码和页大小变化，重新请求数据
 watch([currentPage, pageSize], () => {
   fetchFiles()
 })
 
-// 全选相关逻辑 (针对当前页)
+// 搜索（支持单个 id 或逗号/空格分隔的 id 数组）
+const handleSearch = () => {
+  const raw = searchKeyword.value.trim()
+  searchIds.value = raw ? raw.split(/[,，\s]+/).filter(Boolean) : []
+
+  // currentPage 变化会触发 watch；否则手动请求
+  if (currentPage.value === 1) {
+    fetchFiles()
+  } else {
+    currentPage.value = 1
+  }
+}
+
+// 全选相关逻辑（基于当前分类过滤后的数据）
 const isAllSelected = computed({
   get: () => {
-    return files.value.length > 0 && selectedIds.value.length === files.value.length
+    return filteredFiles.value.length > 0 && selectedIds.value.length === filteredFiles.value.length
   },
   set: () => {},
 })
 
 const isIndeterminate = computed(() => {
-  return selectedIds.value.length > 0 && selectedIds.value.length < files.value.length
+  return selectedIds.value.length > 0 && selectedIds.value.length < filteredFiles.value.length
 })
 
-// 切换全选
 const handleSelectAll = (val: boolean | string | number) => {
   if (val) {
-    selectedIds.value = files.value.map((f) => f.id)
+    selectedIds.value = filteredFiles.value.map((f) => f.id)
   } else {
     selectedIds.value = []
   }
 }
 
-// 单个选择/取消选择
 const toggleSelect = (id: string) => {
   const index = selectedIds.value.indexOf(id)
   if (index > -1) {
@@ -170,61 +212,42 @@ const toggleSelect = (id: string) => {
   }
 }
 
-// 清空选择
 const clearSelection = () => {
   selectedIds.value = []
 }
 
-/*
-
-
-
-
-后端分页下，删除成功后应该重新调用 fetchFiles() 刷新列表
-*/
-
-// 单个删除 (悬浮按钮触发)
-const handleSingleDelete = (file: FileItem) => {
-  ElMessageBox.confirm(`确定要删除 "${file.file_name}" 吗？`, '提示', {
-    type: 'warning',
-  })
-    .then(() => {
-      files.value = files.value.filter((f) => f.id !== file.id)
-      total.value -= 1 // 总数减一
-      selectedIds.value = selectedIds.value.filter((id) => id !== file.id)
-      ElMessage.success('删除成功(前端模拟)')
-    })
-    .catch(() => {})
+/**
+ * 下载（接口暂时写死，后续替换为真实下载接口）
+ * TODO: 替换为真实下载 API
+ */
+const downloadFileApi = (file: FileItem) => {
+  const link = document.createElement('a')
+  link.href = file.url
+  link.download = file.file_name
+  link.target = '_blank'
+  document.body.appendChild(link)
+  link.click()
+  document.body.removeChild(link)
 }
 
-// 批量删除
-const handleBatchDelete = () => {
+// 单个下载
+const handleSingleDownload = (file: FileItem) => {
+  downloadFileApi(file)
+  ElMessage.success(`开始下载：${file.file_name}`)
+}
+
+// 批量下载（间隔触发，避免浏览器拦截）
+const handleBatchDownload = () => {
   if (selectedIds.value.length === 0) return
-  ElMessageBox.confirm(`确定要删除选中的 ${selectedIds.value.length} 个文件吗？`, '提示', {
-    type: 'warning',
+  const targets = files.value.filter((f) => selectedIds.value.includes(f.id))
+  targets.forEach((file, index) => {
+    setTimeout(() => downloadFileApi(file), index * 300)
   })
-    .then(() => {
-      // 记录删除数量
-      const deleteCount = selectedIds.value.length
-      files.value = files.value.filter((f) => !selectedIds.value.includes(f.id))
-      total.value -= deleteCount // 总数扣除
-      selectedIds.value = []
-      ElMessage.success('批量删除成功(前端模拟)')
-    })
-    .catch(() => {})
-}
-
-// 单个移动 / 批量移动 (占位方法)
-const handleSingleMove = (file: FileItem) => {
-  ElMessage.info(`准备移动文件: ${file.file_name}`)
-}
-const handleBatchMove = () => {
-  ElMessage.info(`准备移动 ${selectedIds.value.length} 个文件`)
+  ElMessage.success(`开始下载 ${targets.length} 个文件`)
 }
 </script>
 
 <style lang="scss" scoped>
-/* 样式保持原样，未作任何修改 */
 @use '@/style/variables.scss' as *;
 
 .files-container {
@@ -267,7 +290,12 @@ const handleBatchMove = () => {
   .right-actions {
     display: flex;
     align-items: center;
-    gap: 16px;
+    gap: 12px;
+
+    /* 搜索框 */
+    .search-input {
+      width: 240px;
+    }
 
     .action-icon {
       font-size: 18px;
@@ -278,12 +306,13 @@ const handleBatchMove = () => {
       &:hover {
         color: var(--el-color-primary);
       }
-
-      &.delete-icon:hover {
-        color: var(--el-color-danger);
-      }
     }
   }
+}
+
+/* 分类栏 */
+.category-tabs {
+  margin-bottom: 20px;
 }
 
 /* 网格布局 */
