@@ -62,7 +62,7 @@
 import { CirclePlus, Setting, CloseBold } from '@element-plus/icons-vue'
 import { ref } from 'vue'
 import { getCategoryIdByPath } from '@/utils/category'
-import { type SubsetRef, getSubset, insertSubset, deleteSubset } from '@/api/subsets'
+import { type SubsetRef, getSubset, insertSubset } from '@/api/subsets'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import DrawerSubset from './drawer-subset.vue'
@@ -128,38 +128,6 @@ const subsetDelete = async (id: string) => {
   } catch (error: any) {
     ElMessage.error(error.response.data.data.message || '删除失败')
   }
-}
-const apisubsetDelete = async () => {
-  try {
-    let res: any = null
-    if (subsetDeleteArr.value.length === 0) return ElMessage.warning('请选择要删除的分组')
-    for (let i = 0; i < subsetDeleteArr.value.length; i++) {
-      res = await deleteSubset({ id: subsetDeleteArr.value[i] })
-    }
-    if (res.code === 200) {
-      ElMessage.success('删除成功')
-    } else {
-      ElMessage.error(res.data[0].message || '删除失败')
-    }
-    a()
-  } catch (error: any) {
-    if (error.response.data.code === 400) {
-      console.log(error.response.data.data)
-      ElMessage.error(error.response.data.data.message || '删除失败')
-      a()
-    } else {
-      ElMessage.error(error.response.data.data.message || '删除失败')
-    }
-  } finally {
-    deleteRef.value = false
-    subsetDeleteArr.value = []
-  }
-}
-//取消删除
-const cancelDelete = () => {
-  deleteRef.value = false
-  subsetDeleteArr.value = []
-  a()
 }
 </script>
 
