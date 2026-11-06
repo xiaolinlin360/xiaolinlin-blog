@@ -25,7 +25,7 @@ interface getSubsetRef {
   data: SubsetRef[]
   code: number
 }
-export const getSubset = (data: { category_id: string }) => {
+export const getSubset = (data: { category_id: string | undefined; keyword?: string }) => {
   return http.post<any, getSubsetRef>('/subsets/getSubset', data)
 }
 

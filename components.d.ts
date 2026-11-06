@@ -17,6 +17,7 @@ declare module 'vue' {
     Datas: typeof import('./src/components/overview/datas.vue')['default']
     DrawerArticle: typeof import('./src/components/articles/drawer-article.vue')['default']
     DrawerLabel: typeof import('./src/components/articles/drawer-label.vue')['default']
+    DrawerSubset: typeof import('./src/components/filesview/drawer-subset.vue')['default']
     ElAvatar: typeof import('element-plus/es')['ElAvatar']
     ElBadge: typeof import('element-plus/es')['ElBadge']
     ElButton: typeof import('element-plus/es')['ElButton']
@@ -42,6 +43,9 @@ declare module 'vue' {
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
     Subset: typeof import('./src/components/filesview/subset.vue')['default']
+    SubsetAbel: typeof import('./src/components/filesview/Subset-abel.vue')['default']
+    SubsetDrawer: typeof import('./src/components/filesview/subset-drawer.vue')['default']
+    SubsetLabel: typeof import('./src/components/filesview/subset-label.vue')['default']
   }
   export interface GlobalDirectives {
     vLoading: typeof import('element-plus/es')['ElLoadingDirective']

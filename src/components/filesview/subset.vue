@@ -26,22 +26,9 @@
       <el-button link type="primary" class="action-btn" @click="create">
         <el-icon><CirclePlus /></el-icon>新建
       </el-button>
-      <el-button
-        link
-        type="primary"
-        class="action-btn"
-        @click="deleteRef = !deleteRef"
-        v-if="!deleteRef">
+      <el-button link type="primary" class="action-btn" @click="drawerVisible = true">
         <el-icon><Setting /></el-icon>管理分组
       </el-button>
-      <div v-else>
-        <el-button link type="primary" class="action-btn" @click="apisubsetDelete">
-          <el-icon><Setting /></el-icon>确认删除
-        </el-button>
-        <el-button link type="primary" class="action-btn" @click="cancelDelete">
-          <el-icon><Setting /></el-icon>取消
-        </el-button>
-      </div>
     </div>
   </div>
 
@@ -68,6 +55,7 @@
       </div>
     </template>
   </el-dialog>
+  <DrawerSubset v-model="drawerVisible" @refresh="a" :originalSubsets="subsets" />
 </template>
 
 <script setup lang="ts">
@@ -77,12 +65,14 @@ import { getCategoryIdByPath } from '@/utils/category'
 import { type SubsetRef, getSubset, insertSubset, deleteSubset } from '@/api/subsets'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
+import DrawerSubset from './drawer-subset.vue'
 const router = useRouter()
 const subsets = ref<SubsetRef[]>([])
 const subset_active = ref<string | undefined>()
 const category = ref<string | undefined>()
 const deleteRef = ref<boolean>(false)
 const subsetDeleteArr = ref<string[]>([])
+const drawerVisible = ref(false)
 
 // --- 新增：弹窗相关状态 ---
 const dialogVisible = ref(false)
