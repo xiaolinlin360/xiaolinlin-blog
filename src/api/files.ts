@@ -9,6 +9,7 @@ export interface FileItem {
   url: string
   created_at: string
   article_id: string | null // 关联文章ID (uuid，可为 null)
+  gallery_id: string | null // 关联画廊ID (uuid，可为 null)
 }
 interface FileRes {
   code: number
@@ -38,4 +39,20 @@ interface TotalFileRes {
 }
 export const getTotalFile = () => {
   return http.post<any, TotalFileRes>('/files/getTotalFile')
+}
+
+//上传文件
+interface FormDataFile {
+  gallery_id?: string | null
+  article_id?: string | null
+  file: File
+}
+interface FormDataFileRes {
+  code: number
+  data: {
+    message: string
+  }
+}
+export const uploadFile = (data: FormDataFile) => {
+  return http.post<any, FormDataFileRes>('/files/upload', data)
 }

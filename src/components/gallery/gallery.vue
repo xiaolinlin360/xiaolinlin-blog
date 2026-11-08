@@ -75,9 +75,14 @@ const openDrawer = (item: any) => {
 
 // 删除逻辑
 const handleDelete = async (id: string) => {
-  const confirmRes = await ElMessageBox.confirm('确定要删除这个画廊吗？', '警告', {
+  const confirmRes = await ElMessageBox.confirm('确定要删除这个画廊吗？删除后无法恢复。', '警告', {
     type: 'warning',
-  }).catch(() => false)
+    confirmButtonText: '确认删除',
+    cancelButtonText: '取消',
+  }).catch(() => {
+    ElMessage.info('已取消删除')
+    return false
+  })
   if (!confirmRes) return
   try {
     await deleteGallery({ id })

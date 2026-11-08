@@ -23,6 +23,9 @@ importers:
       element-plus:
         specifier: ^2.14.7
         version: 2.14.7(vue@3.5.43(typescript@6.0.3))
+      markstream-vue:
+        specifier: ^2.0.24
+        version: 2.0.24(vue@3.5.43(typescript@6.0.3))
       mockjs:
         specifier: ^1.1.0
         version: 1.1.0
@@ -91,6 +94,9 @@ packages:
 
   '@bufbuild/protobuf@2.16.0':
     resolution: {integrity: sha512-FWa0sPlqYGJgpTs6OxBRcL/AW4JT0OIO+W1ajerluoTVh8CV0B7XM1qsNCRgnkSCkRCgOICKHRQlY17jrsm0+Q==}
+
+  '@chenglou/pretext@0.0.9':
+    resolution: {integrity: sha512-vInlpC//3vjRfWTs78k2BBIq/0bUdpjIp8TIn9fXe0NvnChhTQZfjioVzERQQbkQvCVpPpw7PDOrTWMHpq27VA==}
 
   '@ctrl/tinycolor@4.2.1':
     resolution: {integrity: sha512-Vh5uy9Y1JBMId6J1f68TMXnZrTCvNdo9Fu2k0d1YnJngR+sM5kWTKl441c/3TFs+cG0NWOjRWgQ/iaWhbYx+7A==}
@@ -524,6 +530,10 @@ packages:
     resolution: {integrity: sha512-TWrgLOFUQTH994YUyl1yT4uyavY5nNB5muff+RtWaqNVCAK408b5ZnnbNAUEWLTCpum9w6arT70i1XdQ4UeOPA==}
     engines: {node: '>=0.12'}
 
+  entities@8.1.0:
+    resolution: {integrity: sha512-kxL7msIffSuh9aaFAMD7rxAIuTRMAHMeBtgHW2yUdWw732ZNh4MehkF2gdjvtdmikkaIP9bFDDJOPlsvm7avrA==}
+    engines: {node: '>=20.19.0'}
+
   es-define-property@1.0.1:
     resolution: {integrity: sha512-e3nRfgfUZ4rNGL232gUgX06QNyyez04KdjFrF+LTRoOXmrOgFKDg4BCdsjW8EnT69eqdYGmRpJwiPVYNrCaW3g==}
     engines: {node: '>= 0.4'}
@@ -706,6 +716,9 @@ packages:
     resolution: {integrity: sha512-WkUDrojuJs0xkgGf2udWxa3yGBRxPtxUkB79i6aCZLRgc7PM8fZe9TosfPDcvEpQZbuFASnHYmRLBLUbmLOIIA==}
     engines: {node: '>= 12.0.0'}
 
+  linkify-it@6.1.0:
+    resolution: {integrity: sha512-wJ/TwpSDTLepCrQoYWYIExIKg5Zchex2Nn5yk2mFnB+6PtdkHtyLx742md9csRjjOnGkKIS/RrbY7l8D6gT9Vw==}
+
   local-pkg@1.2.1:
     resolution: {integrity: sha512-++gUqRDEvcnN6Zhqrr+y/CkVEHhlrR96vZn3nZZPYzMcBUyBtTKzB9NadClFIsIVSsu+3i9tfk/erqy9kAmt7Q==}
     engines: {node: '>=14'}
@@ -733,9 +746,61 @@ packages:
   magic-string@1.4.3:
     resolution: {integrity: sha512-z12OxmaPGE0F4xlpGdjuAUckipLpQlTAuAmyGhNoD7ODpYUzvDfvtxUbjM/jwznyP178oju/KDdyi220wNJ0RQ==}
 
+  markdown-it-container@4.0.0:
+    resolution: {integrity: sha512-HaNccxUH0l7BNGYbFbjmGpf5aLHAMTinqRZQAEQbMr2cdD3z91Q6kIo1oUn1CQndkT03jat6ckrdRYuwwqLlQw==}
+
+  markdown-it-footnote@4.0.0:
+    resolution: {integrity: sha512-WYJ7urf+khJYl3DqofQpYfEYkZKbmXmwxQV8c8mO/hGIhgZ1wOe7R4HLFNwqx7TjILbnC98fuyeSsin19JdFcQ==}
+
+  markdown-it-ins@4.0.0:
+    resolution: {integrity: sha512-sWbjK2DprrkINE4oYDhHdCijGT+MIDhEupjSHLXe5UXeVr5qmVxs/nTUVtgi0Oh/qtF+QKV0tNWDhQBEPxiMew==}
+
+  markdown-it-mark@4.0.0:
+    resolution: {integrity: sha512-YLhzaOsU9THO/cal0lUjfMjrqSMPjjyjChYM7oyj4DnyaXEzA8gnW6cVJeyCrCVeyesrY2PlEdUYJSPFYL4Nkg==}
+
+  markdown-it-sup@2.0.0:
+    resolution: {integrity: sha512-5VgmdKlkBd8sgXuoDoxMpiU+BiEt3I49GItBzzw7Mxq9CxvnhE/k09HFli09zgfFDRixDQDfDxi0mgBCXtaTvA==}
+
+  markdown-it-task-checkbox@1.0.6:
+    resolution: {integrity: sha512-7pxkHuvqTOu3iwVGmDPeYjQg+AIS9VQxzyLP9JCg9lBjgPAJXGEkChK6A2iFuj3tS0GV3HG2u5AMNhcQqwxpJw==}
+
+  markdown-it-ts@1.1.3:
+    resolution: {integrity: sha512-SbESZWanQt/SLspTRPnzi2mKXatM35KHjkIy9QF0w2LZX8Gxu/37n9jiYccolE2OaMf8ikc0BK7LcFSNY/1GHQ==}
+    engines: {node: '>=20.19'}
+
+  markstream-core@2.0.24:
+    resolution: {integrity: sha512-RgboNZO9Wm5a+mgE0eHalTCczWTZ5SUtfgIjm4NJImj04p2V5aS4Tv/+I4P8y5KzcoJBDSpwzSKxeTTKfKI6OA==}
+
+  markstream-vue@2.0.24:
+    resolution: {integrity: sha512-YxaV5awT4VHG9szXyj9CVYpp5aszsuzJfKWozs5pUQDpdZQbj+N2/HQQcgWjBpJ0zKdwvcW+hKZtW0SnuSw8zw==}
+    peerDependencies:
+      '@antv/infographic': ^0.2.3
+      '@terrastruct/d2': '>=0.1.33'
+      katex: '>=0.16.22'
+      mermaid: '>=11'
+      stream-diffs: '>=0.0.2'
+      vue: '>=3.0.0'
+      vue-i18n: '>=9'
+    peerDependenciesMeta:
+      '@antv/infographic':
+        optional: true
+      '@terrastruct/d2':
+        optional: true
+      katex:
+        optional: true
+      mermaid:
+        optional: true
+      stream-diffs:
+        optional: true
+      vue-i18n:
+        optional: true
+
   math-intrinsics@1.1.0:
     resolution: {integrity: sha512-/IXtbwEk5HTPyEwyKX6hGkYXxM9nbj64B+ilVJnC/R6B0pH5G4V3b0pVbL7DBj4tkhBAppbQUlf6F6Xl9LHu1g==}
     engines: {node: '>= 0.4'}
+
+  mdurl@2.1.0:
+    resolution: {integrity: sha512-1+HBaOx0zi/dQWht8rNv9MYf9qqpqL/kxI0hXImU6Y547zM6Sni8BQibt7ifgMcYtQg41ao3Ivd6cnSM86inpg==}
 
   memoize-one@6.0.0:
     resolution: {integrity: sha512-rkpe71W0N0c0Xz6QD0eJETuWAJGnJ9afsl1srmwPrI+yBCkge5EycXXbYRyvL29zZVUWQCY7InPRCv3GDXuZNw==}
@@ -832,6 +897,10 @@ packages:
   proxy-from-env@2.1.0:
     resolution: {integrity: sha512-cJ+oHTW1VAEa8cJslgmUZrc+sjRKgAKl3Zyse6+PV38hZe/V6Z14TbCuXcan9F9ghlz4QrFr2c92TNF82UkYHA==}
     engines: {node: '>=10'}
+
+  punycode.js@2.3.1:
+    resolution: {integrity: sha512-uxFIHU0YlHYhDQtV4R9J6a52SLx28BCjT+4ieh7IGbgwVJWO+km431c4yRlREUAsAmt/uMjQUyQHNEPf0M39CA==}
+    engines: {node: '>=6'}
 
   quansync@0.2.11:
     resolution: {integrity: sha512-AifT7QEbW9Nri4tAwR5M/uzpBuqfZf+zwaEM/QkzEjj7NBuFD2rBuy0K3dE+8wltbezDV7JMA0WfnCPYRSYbXA==}
@@ -977,6 +1046,9 @@ packages:
     resolution: {integrity: sha512-KGj/8Y43x35aZVDtt+J4mK1hoLGHULMYfSkODJNQjNDC3oW1PqPoxMwo0pLUsWM/UEGzON/NxeHywEfNXNP3Vw==}
     engines: {node: '>=0.10.0'}
 
+  stream-markdown-parser@1.2.25:
+    resolution: {integrity: sha512-ChP47WMbx5E4fx70Q/8qrhsWyC4OdhwWxGiZRcCClRUmt7/farJkqYyVaVGBByFDeSS2uG+6E1bCH/vYZ7g+JA==}
+
   strip-literal@4.0.0:
     resolution: {integrity: sha512-PaqAvfUZKBwc/SLmNZtHmzK+v19Z4O4eS3cKPeGvbIv/U3pnyEq4Tuw3/4v/FwfM8VQaEawsyCcOQ0P+kpwWWw==}
 
@@ -1006,6 +1078,9 @@ packages:
     resolution: {integrity: sha512-y2TvuxSZPDyQakkFRPZHKFm+KKVqIisdg9/CZwm9ftvKXLP8NRWj38/ODjNbr43SsoXqNuAisEf1GdCxqWcdBw==}
     engines: {node: '>=14.17'}
     hasBin: true
+
+  uc.micro@3.0.0:
+    resolution: {integrity: sha512-U3PppEkleoTnIfi8BozMx3yju3qc/L6SwqWo2Sw+54PX+PX0q9I+r1Um5HCmqD7n9VDX5/v3vQH/AjA6deDdtw==}
 
   ufo@1.6.4:
     resolution: {integrity: sha512-JFNbkD1Svwe0KvGi8GOeLcP4kAWQ609twvCdcHxq1oSL8svv39ZuSvajcD8B+5D0eL4+s1Is2D/O6KN3qcTeRA==}
@@ -1193,6 +1268,8 @@ snapshots:
       '@babel/helper-validator-identifier': 7.29.7
 
   '@bufbuild/protobuf@2.16.0': {}
+
+  '@chenglou/pretext@0.0.9': {}
 
   '@ctrl/tinycolor@4.2.1': {}
 
@@ -1583,6 +1660,8 @@ snapshots:
 
   entities@7.0.1: {}
 
+  entities@8.1.0: {}
+
   es-define-property@1.0.1: {}
 
   es-errors@1.3.0: {}
@@ -1729,6 +1808,10 @@ snapshots:
       lightningcss-win32-arm64-msvc: 1.33.0
       lightningcss-win32-x64-msvc: 1.33.0
 
+  linkify-it@6.1.0:
+    dependencies:
+      uc.micro: 3.0.0
+
   local-pkg@1.2.1:
     dependencies:
       mlly: 1.8.2
@@ -1757,7 +1840,38 @@ snapshots:
     dependencies:
       '@jridgewell/sourcemap-codec': 1.6.0
 
+  markdown-it-container@4.0.0: {}
+
+  markdown-it-footnote@4.0.0: {}
+
+  markdown-it-ins@4.0.0: {}
+
+  markdown-it-mark@4.0.0: {}
+
+  markdown-it-sup@2.0.0: {}
+
+  markdown-it-task-checkbox@1.0.6: {}
+
+  markdown-it-ts@1.1.3:
+    dependencies:
+      entities: 8.1.0
+      linkify-it: 6.1.0
+      mdurl: 2.1.0
+      punycode.js: 2.3.1
+
+  markstream-core@2.0.24: {}
+
+  markstream-vue@2.0.24(vue@3.5.43(typescript@6.0.3)):
+    dependencies:
+      '@chenglou/pretext': 0.0.9
+      '@floating-ui/dom': 1.8.0
+      markstream-core: 2.0.24
+      stream-markdown-parser: 1.2.25
+      vue: 3.5.43(typescript@6.0.3)
+
   math-intrinsics@1.1.0: {}
+
+  mdurl@2.1.0: {}
 
   memoize-one@6.0.0: {}
 
@@ -1836,6 +1950,8 @@ snapshots:
       source-map-js: 1.2.2
 
   proxy-from-env@2.1.0: {}
+
+  punycode.js@2.3.1: {}
 
   quansync@0.2.11: {}
 
@@ -1966,6 +2082,16 @@ snapshots:
 
   source-map-js@1.2.2: {}
 
+  stream-markdown-parser@1.2.25:
+    dependencies:
+      markdown-it-container: 4.0.0
+      markdown-it-footnote: 4.0.0
+      markdown-it-ins: 4.0.0
+      markdown-it-mark: 4.0.0
+      markdown-it-sup: 2.0.0
+      markdown-it-task-checkbox: 1.0.6
+      markdown-it-ts: 1.1.3
+
   strip-literal@4.0.0:
     dependencies:
       js-tokens: 10.0.0
@@ -1990,6 +2116,8 @@ snapshots:
   tslib@2.8.1: {}
 
   typescript@6.0.3: {}
+
+  uc.micro@3.0.0: {}
 
   ufo@1.6.4: {}
 

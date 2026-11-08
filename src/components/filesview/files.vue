@@ -43,13 +43,13 @@
       </div>
     </div>
 
-    <!-- 分类栏目：全部 / 文章附件 / 其他 -->
+    <!-- 分类栏目：全部 / 文章附件 / 图库附件 / 其他 -->
     <el-radio-group v-model="activeCategory" class="category-tabs">
       <el-radio-button label="all">全部</el-radio-button>
       <el-radio-button label="article">文章附件</el-radio-button>
+      <el-radio-button label="gallery">图库附件</el-radio-button>
       <el-radio-button label="other">其他</el-radio-button>
     </el-radio-group>
-
     <!-- 文件网格列表 -->
     <div class="file-grid">
       <div
@@ -125,16 +125,17 @@ const searchKeyword = ref('')
 const searchIds = ref<string[]>([])
 
 // 分类：全部 / 文章附件 / 其他
-const activeCategory = ref<'all' | 'article' | 'other'>('all')
-
+const activeCategory = ref<'all' | 'article' | 'gallery' | 'other'>('all')
+const hasValue = (val: unknown) => val !== null && val !== undefined && val !== ''
 // 根据 article_id 分类过滤（后端未提供分类参数，故前端过滤当前页数据）
 const filteredFiles = computed(() => {
   switch (activeCategory.value) {
     case 'article':
-      // article_id 不为 null / '' 视为文章附件
-      return files.value.filter((f) => f.article_id && f.article_id !== '')
+      return files.value.filter((f) => hasValue(f.article_id))
+    case 'gallery':
+      return files.value.filter((f) => hasValue(f.gallery_id))
     case 'other':
-      return files.value.filter((f) => !f.article_id || f.article_id === '')
+      return files.value.filter((f) => !hasValue(f.article_id) && !hasValue(f.gallery_id))
     default:
       return files.value
   }
