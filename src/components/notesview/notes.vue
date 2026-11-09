@@ -80,15 +80,15 @@ const props = defineProps<{
   subset_id?: string
 }>()
 
-const notes = ref<Note[]>([])
-const loading = ref(false)
-const isEditing = ref(false)
-const submitting = ref(false)
-const draftContent = ref('')
+const notes = ref<Note[]>([]) // 笔记列表
+const loading = ref(false) // 加载状态
+const isEditing = ref(false) // 是否正在编辑
+const submitting = ref(false) // 提交状态
+const draftContent = ref('') // 草稿内容
 
-const inputRef = ref<InstanceType<typeof ElInput>>()
-const previewInnerRef = ref<HTMLElement | null>(null)
-const fileInputRef = ref<HTMLInputElement | null>(null)
+const inputRef = ref<InstanceType<typeof ElInput>>() // 输入框实例
+const previewInnerRef = ref<HTMLElement | null>(null) // 预览渲染实例
+const fileInputRef = ref<HTMLInputElement | null>(null) // 图片上传框实例
 
 // 只在本页把 image 节点换成支持本地 token 的渲染器，避免影响其它页面
 const NOTES_RENDER_ID = 'notes'

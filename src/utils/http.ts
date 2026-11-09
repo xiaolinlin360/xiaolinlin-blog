@@ -3,7 +3,7 @@ import { useUserStore } from '@/stores/index.ts'
 import { ElMessage } from 'element-plus'
 import router from '@/router/index.ts'
 
-const url = 'http://localhost:3001'
+const url = 'http://api.xiaolinlin.xyz/'
 const http = axios.create({
   baseURL: url,
   timeout: 5000,
