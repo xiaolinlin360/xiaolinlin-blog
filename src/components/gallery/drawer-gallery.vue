@@ -91,7 +91,7 @@
 import { ref, computed, watch } from 'vue'
 import { Search, Close } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
-import DrawerGallery from './drawer-gallery.vue'
+// import DrawerGallery from './drawer-gallery.vue'
 
 // 这里根据你实际使用的 API 替换
 import { getLabels, updateLabels, deleteLabels, type Labels } from '@/api/labels'
