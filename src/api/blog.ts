@@ -22,9 +22,19 @@ export interface Article {
   labels: Label[]
 }
 
-/** 文章详情（编辑回显用，多一个封面 id） */
+/** 文章附件（files 表里挂了 article_id 的记录） */
+export interface ArticleAttachment {
+  id: string
+  file_name: string
+  url: string
+  size: string
+  type: string
+}
+
+/** 文章详情（编辑回显用：多出封面 id 与附件明细） */
 export interface ArticleDetail extends Article {
   cover_file_id: string | null
+  attachments: ArticleAttachment[]
 }
 
 /** data 层 */
@@ -78,6 +88,8 @@ export interface ArticlePayload {
   content: string
   subset_id: string
   cover_file_id?: string | null
+  /** 附件在 files 表里的 id 列表，后端会把它们挂到这篇文章上 */
+  attachment_ids?: string[]
   state: boolean
 }
 
