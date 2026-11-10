@@ -77,6 +77,9 @@
       </template>
     </el-dialog>
     <DrawerLabel v-model="drawerVisible" @refresh="fetchLabels" :originalLabels="labels" />
+
+    <!-- 发布 / 编辑文章抽屉：新建与编辑复用同一个组件 -->
+    <DrawerArticle ref="articleDrawerRef" @success="refresh" />
   </div>
 </template>
 
@@ -88,7 +91,9 @@ import { getArticle, getTotalArticle, deleteArticle } from '@/api/blog'
 import type { Article } from '@/api/blog'
 import { getLabels, type Labels, insertLabels } from '@/api/labels'
 import DrawerLabel from './drawer-label.vue'
+import DrawerArticle from './drawer-article.vue'
 const drawerVisible = ref(false)
+const articleDrawerRef = ref<InstanceType<typeof DrawerArticle>>()
 
 const props = defineProps<{
   subsetId: string | undefined
@@ -132,14 +137,19 @@ const fetchData = async () => {
   }
 }
 
-// 获取总数
+// 获取总数（必须和列表用同一个 subset_id，否则切分组后分页器会虚高）
 const fetchTotal = async () => {
   try {
-    const res = await getTotalArticle()
+    const res = await getTotalArticle(props.subsetId || undefined)
     total.value = res.data.total
   } catch (error) {
     console.error('获取总数失败', error)
   }
+}
+
+// 列表 + 总数一起刷新（新增 / 编辑 / 删除后统一调这个）
+const refresh = async () => {
+  await Promise.all([fetchData(), fetchTotal()])
 }
 
 // 新增：确认添加标签
@@ -166,27 +176,26 @@ watch(
   () => props.subsetId,
   () => {
     pageNum.value = 1 // 切换分类回到第一页
-    fetchData()
-    fetchTotal()
+    refresh()
   },
   { immediate: true } // 初始化时也执行一次
 )
 
-// 初始化
-onMounted(() => {
-  if (!props.subsetId || props.subsetId === undefined) {
-    fetchData()
-    fetchTotal()
-    fetchLabels()
-  }
-})
+// 初始化：列表已在 watch(immediate) 里拉过，这里只补标签
+onMounted(fetchLabels)
 
-// 编辑按钮点击
+// 编辑按钮点击 → 打开抽屉（带 id 走回显）
 const handleEdit = (article: Article) => {
-  ElMessage.info(`准备编辑文章: ${article.title}`)
-  // 这里可以跳转到编辑页，或者打开编辑弹窗
-  // router.push(`/edit/${article.id}`)
+  articleDrawerRef.value?.open(article.id)
 }
+
+// 新建按钮点击（由 BlogView 的"发布文章"按钮调用）
+const openCreate = () => {
+  articleDrawerRef.value?.open()
+}
+
+// 暴露给父组件：BlogView 用 openCreate，刷新用 refresh
+defineExpose({ openCreate, refresh })
 
 // 删除按钮点击
 const handleDelete = async (id: string) => {
@@ -206,8 +215,7 @@ const handleDelete = async (id: string) => {
     if (articles.value.length === 1 && pageNum.value > 1) {
       pageNum.value--
     }
-    fetchData()
-    fetchTotal()
+    refresh()
   } catch (error) {
     console.error('删除失败', error)
   }
