@@ -1,6 +1,6 @@
 <template>
   <div class="notes-view">
-    <headTitle :title="'NotesView'" />
+    <headTitle :title="'随笔随记'" />
     <subset @subset_id="handleSubsetIdChange" />
     <Notes :subsetId="subsetId"></Notes>
   </div>

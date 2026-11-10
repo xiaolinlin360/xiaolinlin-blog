@@ -45,10 +45,10 @@
 
     <!-- 分类栏目：全部 / 文章附件 / 图库附件 / 其他 -->
     <el-radio-group v-model="activeCategory" class="category-tabs">
-      <el-radio-button label="all">全部</el-radio-button>
-      <el-radio-button label="article">文章附件</el-radio-button>
-      <el-radio-button label="gallery">图库附件</el-radio-button>
-      <el-radio-button label="other">其他</el-radio-button>
+      <el-radio-button label="all" value="all">全部</el-radio-button>
+      <el-radio-button label="article" value="article">文章附件</el-radio-button>
+      <el-radio-button label="gallery" value="gallery">图库附件</el-radio-button>
+      <el-radio-button label="other" value="other">其他</el-radio-button>
     </el-radio-group>
     <!-- 文件网格列表 -->
     <div class="file-grid">

@@ -18,15 +18,13 @@ interface NoteListRes {
     pageSize: number
   }
 }
-export const getNotes = async (data: {
+export const getNotes = (data: {
   pageNum?: number // 页码，默认 1
   pageSize?: number // 每页条数，默认 10
   subset_id?: string | undefined // 可选：按 subset_id 过滤
   note_ids?: string | string[] // 可选：按特定ID组过滤
 }) => {
-  const a = await http.post<any, NoteListRes>('/notes/getNotes', data)
-  console.log(a)
-  return a
+  return http.post<any, NoteListRes>('/notes/getNotes', data)
 }
 
 // --- 获取笔记总数 ---

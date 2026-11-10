@@ -57,7 +57,6 @@ const fetchData = async () => {
     })
     galleries.value = res.data.gallerys || []
     const totalRes = await getTotalGallery(props.subsetId)
-    console.log(res.data.gallerys)
 
     total.value = totalRes.data.total
   } catch (error) {
