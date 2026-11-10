@@ -20,7 +20,6 @@ const handleSubsetIdChange = (id: string | undefined) => {
 @use '@/style/variables.scss' as *;
 
 .notes-view {
-  padding: 20px;
   background-color: $my-bg-page; // 使用规范中的页面背景色
 }
 </style>
