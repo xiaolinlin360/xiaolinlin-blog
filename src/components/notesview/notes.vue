@@ -88,7 +88,8 @@ import {
   registerLocalImage,
 } from './local-image'
 import { getNotes, insertNotes, deleteNotes } from '@/api/notes'
-import http, { url as API_BASE } from '@/utils/http'
+import http from '@/utils/http'
+import { toAbsoluteUrl } from '@/utils/asset'
 
 const props = defineProps<{
   subset_id?: string
@@ -258,13 +259,7 @@ const uploadImageApi = async (file: File): Promise<string> => {
 
   // 后端返回的是 /data/... 这种相对路径。前端跑在 5173、后端在 3001，
   // 直接写进 markdown 会被浏览器解析成前端域名的路径（5173/data/...）→ 404。
-  // 用 new URL 拼接：API_BASE 带不带尾斜杠都能得到正确地址，
-  // 也不会拼出 http://host:3001//data/... 这种双斜杠（express 静态目录会 404）。
-  try {
-    return new URL(res.data.url, API_BASE).href
-  } catch {
-    return `${API_BASE.replace(/\/+$/, '')}${res.data.url}`
-  }
+  return toAbsoluteUrl(res.data.url)
 }
 
 // 扫描内容中的本地图片 token，依次上传并替换为真实 URL

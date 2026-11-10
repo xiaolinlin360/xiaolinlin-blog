@@ -125,7 +125,8 @@ import { ref, computed } from 'vue'
 import { ElMessage, type FormInstance, type FormRules, type UploadFile } from 'element-plus'
 import type { UploadInstance } from 'element-plus'
 import { UploadFilled, Document, Close } from '@element-plus/icons-vue'
-import http, { url as API_BASE } from '@/utils/http'
+import http from '@/utils/http'
+import { toAbsoluteUrl } from '@/utils/asset'
 import { getArticleDetail, insertArticle, updateArticle } from '@/api/blog'
 import { getSubset, type SubsetRef } from '@/api/subsets'
 import { getCategoryIdByPath } from '@/utils/category'
@@ -183,15 +184,6 @@ const rules: FormRules = {
   subset_id: [{ required: true, message: '请选择分组', trigger: 'change' }],
   introduce: [{ required: true, message: '请输入简介', trigger: 'blur' }],
   content: [{ required: true, message: '请输入正文', trigger: 'blur' }],
-}
-
-/** 后端返回 /data/... 相对路径，拼成绝对地址（base 带不带尾斜杠都正确） */
-const toAbsoluteUrl = (pathOrUrl: string) => {
-  try {
-    return new URL(pathOrUrl, API_BASE).href
-  } catch {
-    return `${API_BASE.replace(/\/+$/, '')}${pathOrUrl}`
-  }
 }
 
 const makeKey = () =>

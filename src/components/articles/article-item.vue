@@ -87,7 +87,7 @@ import {
   Paperclip,
 } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
-import { url as API_BASE } from '@/utils/http'
+import { toAbsoluteUrl } from '@/utils/asset'
 import type { Article } from '@/api/blog' // 引入你定义的接口
 
 const props = defineProps<{
@@ -106,11 +106,7 @@ const coverUrl = computed(() => {
     // 没传封面时给个占位图，避免卡片空白
     return `https://picsum.photos/200/200?random=${props.article.id.slice(0, 5)}`
   }
-  try {
-    return new URL(raw, API_BASE).href
-  } catch {
-    return raw
-  }
+  return toAbsoluteUrl(raw)
 })
 
 // 格式化时间

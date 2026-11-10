@@ -46,6 +46,7 @@ import { computed } from 'vue'
 import { Picture, EditPen, Delete } from '@element-plus/icons-vue'
 // import { ref } from 'vue'
 import { type Gallery } from '@/api/gallerys'
+import { toAbsoluteUrl } from '@/utils/asset'
 
 const props = defineProps<{
   gallery: Gallery // 建议替换为你实际的 API 类型定义
@@ -63,7 +64,8 @@ const FALLBACK_IMG = 'https://picsum.photos/400/300?random='
 const displayImages = computed(() => {
   const urls = props.gallery.gallery_urls || []
   if (urls.length === 0) return [`${FALLBACK_IMG}${props.gallery.id || 1}`]
-  return urls.slice(0, 4).map((url: string) => url || `${FALLBACK_IMG}${Math.random()}`)
+  // 后端给的是 /data/... 相对路径，必须补成后端域名，否则会去 5173 找 → 404
+  return urls.slice(0, 4).map((url) => (url ? toAbsoluteUrl(url) : `${FALLBACK_IMG}${Math.random()}`))
 })
 
 const formatDate = (timeStr: string) => {

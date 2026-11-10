@@ -22,8 +22,8 @@
         @current-change="fetchData" />
     </div>
 
-    <!-- 编辑抽屉 -->
-    <!-- <drawer-gallery v-model="drawerVisible" :current-data="currentEditItem" @success="fetchData" /> -->
+    <!-- 新建 / 编辑图库抽屉 -->
+    <drawer-gallery ref="drawerRef" @success="fetchData" />
   </div>
 </template>
 
@@ -31,7 +31,7 @@
 import { ref, watch } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import GalleryItem from './gallery-item.vue'
-// import DrawerGallery from './drawer-gallery.vue'
+import DrawerGallery from './drawer-gallery.vue'
 import { type Gallery, getGallery, getTotalGallery, deleteGallery } from '@/api/gallerys'
 
 const props = defineProps<{
@@ -44,12 +44,10 @@ const pageNum = ref(1)
 const pageSize = ref(12) // 网格布局一页可以放12个左右
 const total = ref(0)
 
-// 抽屉状态
-const drawerVisible = ref(false)
-const currentEditItem = ref<any>(null)
+// 抽屉实例
+const drawerRef = ref<InstanceType<typeof DrawerGallery>>()
 
 const fetchData = async () => {
-  // 模拟数据，请替换为真实的接口调用
   loading.value = true
   try {
     const res = await getGallery({
@@ -59,6 +57,8 @@ const fetchData = async () => {
     })
     galleries.value = res.data.gallerys || []
     const totalRes = await getTotalGallery(props.subsetId)
+    console.log(res.data.gallerys)
+
     total.value = totalRes.data.total
   } catch (error) {
     console.error('获取列表失败', error)
@@ -67,11 +67,17 @@ const fetchData = async () => {
   }
 }
 
-// 打开抽屉
-const openDrawer = (item: any) => {
-  currentEditItem.value = { ...item }
-  drawerVisible.value = true
+// 编辑：带上 id 打开抽屉回显
+const openDrawer = (item: Gallery) => {
+  drawerRef.value?.open(item.id)
 }
+
+// 新建（由 GalleryView 的"新建图库"按钮调用）
+const openCreate = () => {
+  drawerRef.value?.open()
+}
+
+defineExpose({ openCreate, refresh: fetchData })
 
 // 删除逻辑
 const handleDelete = async (id: string) => {

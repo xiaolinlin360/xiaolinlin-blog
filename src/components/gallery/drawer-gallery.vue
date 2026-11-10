@@ -1,397 +1,412 @@
 <template>
   <el-drawer
     v-model="visible"
-    title="管理标签"
-    size="400px"
-    class="label-drawer"
-    :show-close="false"
-    @close="handleClose">
-    <!-- 顶部搜索 -->
-    <div class="search-wrap">
-      <el-input
-        v-model="searchQuery"
-        placeholder="输入 ID 或名称搜索标签"
-        clearable
-        :prefix-icon="Search"
-        @keyup.enter="handleSearch(searchQuery)"
-        class="custom-input" />
-    </div>
+    :title="isEdit ? '编辑图库' : '新建图库'"
+    size="680px"
+    class="drawer-gallery"
+    destroy-on-close
+    @closed="handleClosed">
+    <el-form
+      ref="formRef"
+      v-loading="loading"
+      :model="formModel"
+      :rules="rules"
+      label-width="80px"
+      class="gallery-form">
+      <el-form-item label="名称" prop="title">
+        <el-input
+          v-model="formModel.title"
+          maxlength="40"
+          show-word-limit
+          placeholder="给这个图库起个名字" />
+      </el-form-item>
 
-    <!-- 1. 未选择区域（可滚动） -->
-    <div class="label-section available-section">
-      <div class="section-title">全部标签</div>
-      <div class="scroll-box">
-        <el-tag
-          v-for="label in searchResults.length ? searchResults : originalLabels"
-          :key="label.id"
-          class="tag-item"
-          type="info"
-          effect="plain"
-          @click="handleSelect(label)">
-          {{ label.label_name }}
-        </el-tag>
-        <el-empty
-          v-if="originalLabels.length === 0"
-          description="没有找到相关标签"
-          :image-size="60" />
-      </div>
-    </div>
+      <el-form-item label="分组" prop="subset_id">
+        <el-select v-model="formModel.subset_id" placeholder="请选择分组" style="width: 100%">
+          <el-option v-for="s in subsets" :key="s.id" :label="s.name" :value="s.id" />
+        </el-select>
+      </el-form-item>
 
-    <!-- 2. 已选择区域 -->
-    <div class="label-section selected-section">
-      <div class="section-title">已选择的标签 ({{ editLabels.length }})</div>
-      <div class="scroll-box">
-        <div v-for="label in editLabels" :key="label.id" class="selected-item">
-          <!-- 编辑模式 -->
-          <el-input
-            v-if="editingId === label.id"
-            v-model="editingValue"
-            size="small"
-            class="edit-input"
-            @blur="saveEdit(label)"
-            @keyup.esc="cancelEdit"
-            @keyup.enter="saveEdit(label)" />
+      <el-form-item label="照片">
+        <div class="photo-box">
+          <!-- 已选照片网格 -->
+          <div v-if="photos.length" class="photo-grid">
+            <div v-for="(item, index) in photos" :key="item.key" class="photo-item">
+              <img :src="item.preview" :alt="item.name" />
+              <div class="photo-mask">
+                <el-icon class="remove" title="移除" @click="removePhoto(index)">
+                  <Close />
+                </el-icon>
+              </div>
+              <span v-if="item.isNew" class="badge">待上传</span>
+            </div>
+          </div>
 
-          <!-- 展示模式 -->
-          <template v-else>
-            <span class="name-text" @dblclick="startEdit(label)">{{ label.label_name }}</span>
-            <el-icon class="remove-icon" @click="handleRemove(label)"><Close /></el-icon>
-          </template>
+          <!-- 拖拽 / 点击添加 -->
+          <el-upload
+            ref="uploadRef"
+            drag
+            multiple
+            accept="image/*"
+            :auto-upload="false"
+            :show-file-list="false"
+            :on-change="handlePhotoChange"
+            class="photo-upload">
+            <el-icon><UploadFilled /></el-icon>
+            <div class="tip">
+              把照片拖到这里，或点击选择
+              <span class="hint">仅支持图片，单张 ≤ 10MB</span>
+            </div>
+          </el-upload>
         </div>
-        <div v-if="editLabels.length === 0" class="empty-tip">暂无选择</div>
-      </div>
-    </div>
+      </el-form-item>
+    </el-form>
 
-    <!-- 3. 已选择删除区域 -->
-    <div class="label-section selected-section">
-      <div class="section-title">已选择删除的标签 ({{ deletedLabels.length }})</div>
-      <div class="scroll-box">
-        <div v-for="label in deletedLabels" :key="label.id" class="selected-item">
-          <span class="name-text" @dblclick="CancelHandleRemove(label)">{{
-            label.label_name
-          }}</span>
-        </div>
-        <div v-if="deletedLabels.length === 0" class="empty-tip">暂无选择</div>
-      </div>
-    </div>
-
-    <!-- 底部确认 -->
     <template #footer>
       <div class="drawer-footer">
-        <el-button class="btn-confirm" type="primary" :loading="submitting" @click="handleConfirm">
-          确认提交
+        <el-button @click="visible = false">取消</el-button>
+        <el-button type="primary" :loading="submitting" @click="handleSubmit">
+          {{ isEdit ? '保存' : '创建' }}
         </el-button>
       </div>
     </template>
   </el-drawer>
-  <!-- <drawer-gallery v-model="drawerVisible" :current-data="currentEditItem" @success="fetchData" /> -->
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue'
-import { Search, Close } from '@element-plus/icons-vue'
-import { ElMessage } from 'element-plus'
-// import DrawerGallery from './drawer-gallery.vue'
-
-// 这里根据你实际使用的 API 替换
-import { getLabels, updateLabels, deleteLabels, type Labels } from '@/api/labels'
-
-const props = defineProps<{
-  modelValue: boolean
-  originalLabels: Labels[]
-}>()
+import { ref, computed } from 'vue'
+import { ElMessage, type FormInstance, type FormRules, type UploadFile } from 'element-plus'
+import type { UploadInstance } from 'element-plus'
+import { UploadFilled, Close } from '@element-plus/icons-vue'
+import http from '@/utils/http'
+import { toAbsoluteUrl } from '@/utils/asset'
+import { getGalleryDetail, insertGallery, updateGallery } from '@/api/gallerys'
+import { getSubset, type SubsetRef } from '@/api/subsets'
+import { getCategoryIdByPath } from '@/utils/category'
 
 const emit = defineEmits<{
-  (e: 'update:modelValue', value: boolean): void
-  (e: 'refresh'): void
+  (e: 'success'): void
 }>()
 
-const visible = computed({
-  get: () => props.modelValue,
-  set: (val) => emit('update:modelValue', val),
-})
+interface UploadRes {
+  code: number
+  message: string
+  data: { id: string; url: string; file_name: string; size: number; type: string }
+}
 
-// 状态管理
-//originalLabels + editLabels + searchResults + deletedLabels
-//初始标签，编辑标签，搜索结果，删除标签
-const searchQuery = ref('')
-const originalLabels = computed(() => props.originalLabels)
-const searchResults = ref<Labels[]>([])
-const editLabels = ref<Labels[]>([])
-const deletedLabels = ref<Labels[]>([])
+/** 待提交的照片：要么是已存在的记录（有 id），要么是新选的文件（有 file） */
+interface PendingPhoto {
+  key: string
+  name: string
+  preview: string
+  file?: File
+  id?: string
+  isNew?: boolean
+}
+
+const visible = ref(false)
+const loading = ref(false)
 const submitting = ref(false)
+const formRef = ref<FormInstance>()
+const uploadRef = ref<UploadInstance>()
+const subsets = ref<SubsetRef[]>([])
 
-// 编辑状态
-const editingId = ref<string | null>(null)
-const editingValue = ref('')
+const createBlankForm = () => ({ id: '', title: '', subset_id: '' })
+const formModel = ref(createBlankForm())
+const isEdit = computed(() => !!formModel.value.id)
 
-// 监听抽屉打开，初始化数据
-watch(
-  () => props.modelValue,
-  async (val) => {
-    if (val) {
-      searchQuery.value = ''
-      editingId.value = null
-      deletedLabels.value = []
-      editLabels.value = []
-      searchResults.value = []
-    }
-  }
-)
+const photos = ref<PendingPhoto[]>([])
+/** 新选照片的 ObjectURL，关闭时要逐个释放 */
+const objectUrls = new Set<string>()
 
-// 获取标签
-const handleSearch = async (query: string) => {
-  const res = await getLabels({ keyword: query })
-  searchResults.value = res.data
+const rules: FormRules = {
+  title: [{ required: true, message: '请输入图库名称', trigger: 'blur' }],
+  subset_id: [{ required: true, message: '请选择分组', trigger: 'change' }],
 }
 
-// 选择标签
-const handleSelect = (label: Labels) => {
-  //过滤id，不能有相同的进入
-  if (editLabels.value.some((item) => item.id === label.id)) {
+const makeKey = () =>
+  typeof crypto !== 'undefined' && crypto.randomUUID
+    ? crypto.randomUUID()
+    : `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
+
+/** 分组下拉：取"摄影"分类下的分组 */
+const loadSubsets = async () => {
+  const categoryId = await getCategoryIdByPath('/gallery')
+  if (!categoryId) {
+    subsets.value = []
     return
   }
-  //把选择的标签添加进入
-  editLabels.value.push(label)
+  const res = await getSubset({ category_id: categoryId })
+  subsets.value = res.data || []
 }
 
-// 移除标签（标记删除）
-const handleRemove = (label: Labels) => {
-  editLabels.value = editLabels.value.filter((i) => i.id !== label.id)
-  if (deletedLabels.value.some((i) => i.id === label.id)) {
-    ElMessage.warning('标签已选择')
-  } else {
-    deletedLabels.value.push(label)
+const releaseObjectUrls = () => {
+  objectUrls.forEach((url) => URL.revokeObjectURL(url))
+  objectUrls.clear()
+}
+
+const resetState = () => {
+  formModel.value = createBlankForm()
+  photos.value = []
+  releaseObjectUrls()
+  uploadRef.value?.clearFiles()
+  formRef.value?.clearValidate()
+}
+
+/**
+ * 打开抽屉
+ * @param id 传 id = 编辑（拉详情回显）；不传 = 新建
+ */
+const open = async (id?: string) => {
+  resetState()
+  visible.value = true
+  loading.value = true
+
+  try {
+    await loadSubsets()
+    if (!id) return
+
+    const res = await getGalleryDetail(id)
+    const d = res.data
+
+    formModel.value = { id: d.id, title: d.title, subset_id: d.subset_id || '' }
+    photos.value = (d.photos || []).map((p) => ({
+      key: p.id,
+      id: p.id,
+      name: p.file_name,
+      preview: toAbsoluteUrl(p.url),
+    }))
+  } catch (error) {
+    console.error('打开图库抽屉失败', error)
+  } finally {
+    loading.value = false
   }
-  console.log(deletedLabels.value)
 }
 
-const CancelHandleRemove = (label: Labels) => {
-  // 从已删除中移除
-  deletedLabels.value = deletedLabels.value.filter((item) => item.id !== label.id)
-  // 添加回已选中
-  if (!editLabels.value.some((i) => i.id === label.id)) {
-    editLabels.value.push(label)
-  }
-}
+// ================= 照片选择（拖拽 / 点击） =================
 
-// 开启编辑
-const startEdit = (label: Labels) => {
-  editingId.value = label.id
-  editingValue.value = label.label_name
-}
+const handlePhotoChange = (uploadFile: UploadFile) => {
+  const raw = uploadFile.raw
+  // 清掉 el-upload 内部列表，方便重复选择同一张
+  uploadRef.value?.clearFiles()
+  if (!raw) return
 
-// 保存编辑
-const saveEdit = (label: Labels) => {
-  const trimmed = editingValue.value.trim()
-  if (!trimmed) {
-    ElMessage.warning('标签名不能为空')
+  if (!raw.type.startsWith('image/')) {
+    ElMessage.error('图库只能放图片（jpg / png / webp / gif）')
     return
   }
-  // 不原地改 props 引用,用新对象替换
-  const idx = editLabels.value.findIndex((item) => item.id === label.id)
-  if (idx !== -1) {
-    editLabels.value[idx] = { ...editLabels.value[idx], label_name: trimmed }
+  if (raw.size > 10 * 1024 * 1024) {
+    ElMessage.error(`「${raw.name}」超过 10MB`)
+    return
   }
-  editingId.value = null
-  editingValue.value = ''
-}
-const cancelEdit = () => {
-  editingId.value = null
-  editingValue.value = ''
+  const duplicated = photos.value.some(
+    (p) => (p.file && p.file.name === raw.name && p.file.size === raw.size) || p.name === raw.name
+  )
+  if (duplicated) {
+    ElMessage.warning('这张照片已添加')
+    return
+  }
+
+  const objectUrl = URL.createObjectURL(raw)
+  objectUrls.add(objectUrl)
+  photos.value.push({
+    key: makeKey(),
+    name: raw.name,
+    preview: objectUrl,
+    file: raw,
+    isNew: true,
+  })
 }
 
-// 确认提交
-const handleConfirm = async () => {
+const removePhoto = (index: number) => {
+  const target = photos.value[index]
+  // 只释放自己创建的 ObjectURL，已存在的网络地址不要动
+  if (target?.isNew && target.preview.startsWith('blob:')) {
+    URL.revokeObjectURL(target.preview)
+    objectUrls.delete(target.preview)
+  }
+  photos.value.splice(index, 1)
+}
+
+// ================= 提交：先补传照片，再一次性提交表单 =================
+
+const uploadToServer = async (file: File) => {
+  const form = new FormData()
+  form.append('file', file)
+  const res = await http.post<any, UploadRes>('/files/uploadFile', form, { timeout: 120000 })
+  return res.data
+}
+
+const handleSubmit = async () => {
+  if (!formRef.value) return
+  try {
+    await formRef.value.validate()
+  } catch {
+    ElMessage.error('请填写完整信息')
+    return
+  }
+
   submitting.value = true
   try {
-    const updateQueue: Promise<any>[] = []
-    // 1. 处理删除逻辑
-    for (const label of deletedLabels.value) {
-      updateQueue.push(deleteLabels({ id: label.id }))
+    if (photos.value.some((p) => !p.id && p.file)) {
+      ElMessage.info('正在上传照片...')
     }
-    // 2. 处理更新逻辑（比较原数据）
-    for (const label of editLabels.value) {
-      const original = originalLabels.value.find((item) => item.id === label.id)
-      if (original && original.label_name !== label.label_name) {
-        updateQueue.push(
-          updateLabels({
-            id: label.id,
-            label_name: label.label_name,
-          })
-        )
+
+    const photoIds: string[] = []
+    for (const item of photos.value) {
+      if (item.id) {
+        photoIds.push(item.id)
+        continue
       }
+      if (!item.file) continue
+      const r = await uploadToServer(item.file)
+      item.id = r.id
+      item.name = r.file_name || item.name
+      item.file = undefined
+      item.isNew = false
+      photoIds.push(r.id)
     }
-    await Promise.all(updateQueue)
-    ElMessage.success('标签操作全部完成')
-    emit('refresh') // 通知父组件刷新
-    visible.value = false // 关闭抽屉
+
+    const payload = {
+      title: formModel.value.title.trim(),
+      subset_id: formModel.value.subset_id,
+      photo_ids: photoIds,
+    }
+
+    if (isEdit.value) {
+      await updateGallery({ ...payload, id: formModel.value.id })
+      ElMessage.success('保存成功')
+    } else {
+      await insertGallery(payload)
+      ElMessage.success('创建成功')
+    }
+
+    visible.value = false
+    emit('success')
   } catch (error) {
-    ElMessage.error('部分操作失败，请检查网络')
+    console.error('提交图库失败', error)
   } finally {
     submitting.value = false
   }
 }
 
-// 关闭时清理状态
-const handleClose = () => {
-  editingId.value = null
-  searchQuery.value = ''
+const handleClosed = () => {
+  resetState()
 }
+
+defineExpose({ open })
 </script>
 
 <style lang="scss" scoped>
 @use '@/style/variables.scss' as *;
 
-.label-drawer {
-  :deep(.el-drawer__header) {
-    margin-bottom: 0;
-    padding: 20px 20px 10px;
-    color: $my-text-main;
-    font-weight: 600;
+.gallery-form {
+  padding-right: 8px;
+}
+
+.photo-box {
+  width: 100%;
+}
+
+/* 已选照片网格 */
+.photo-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.photo-item {
+  position: relative;
+  aspect-ratio: 1 / 1;
+  border-radius: 8px;
+  overflow: hidden;
+  background-color: $my-bg-hover;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
   }
-  :deep(.el-drawer__body) {
-    padding: 10px 20px;
+
+  .photo-mask {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: flex-start;
+    justify-content: flex-end;
+    padding: 6px;
+    background: linear-gradient(to bottom, rgba(0, 0, 0, 0.35), transparent 45%);
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+
+  &:hover .photo-mask {
+    opacity: 1;
+  }
+
+  .remove {
+    cursor: pointer;
+    color: #fff;
+    font-size: 15px;
+    background-color: rgba(0, 0, 0, 0.35);
+    border-radius: 50%;
+    padding: 3px;
+
+    &:hover {
+      background-color: var(--el-color-danger);
+    }
+  }
+
+  .badge {
+    position: absolute;
+    left: 6px;
+    bottom: 6px;
+    font-size: 11px;
+    padding: 1px 6px;
+    border-radius: 4px;
+    color: #fff;
+    background-color: rgba(230, 162, 60, 0.9);
+  }
+}
+
+/* 上传区 */
+.photo-upload {
+  :deep(.el-upload-dragger) {
+    padding: 18px;
     display: flex;
     flex-direction: column;
-    gap: 16px;
-    overflow: hidden;
-  }
-}
-
-.search-wrap {
-  .custom-input {
-    :deep(.el-input__wrapper) {
-      background-color: $my-bg-hover;
-      box-shadow: none;
-      border-radius: 8px;
-    }
-  }
-}
-
-.label-section {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  flex: 1;
-  overflow: hidden;
-
-  .section-title {
-    font-size: 13px;
-    color: $my-text-sub;
-    font-weight: 500;
-  }
-
-  // 虚线框设计
-  .scroll-box {
-    flex: 1;
-    border: 1px dashed $my-border-color;
-    border-radius: 8px;
-    padding: 12px;
-    overflow-y: auto;
-    display: flex;
-    flex-wrap: wrap;
-    align-content: flex-start;
-    gap: 8px;
-
-    // 限制高度，不超过 5 行
-    max-height: 220px;
-    min-height: 100px;
-
-    &::-webkit-scrollbar {
-      width: 4px;
-    }
-    &::-webkit-scrollbar-thumb {
-      background: $my-border-color;
-      border-radius: 4px;
-    }
-  }
-}
-
-// 可选标签样式
-.available-section {
-  flex: 0 0 auto;
-  .tag-item {
-    cursor: pointer;
-    background-color: $my-bg-hover;
-    border-color: transparent;
-    color: $my-text-main;
-    transition: all 0.2s;
-    max-width: 100%;
-
-    &:hover {
-      color: var(--el-color-primary);
-      background-color: var(--el-color-primary-light-9);
-    }
-  }
-}
-
-// 已选标签样式
-.selected-section {
-  flex: 1;
-
-  .scroll-box {
-    align-content: flex-start;
-    flex-direction: column; // 竖排，方便展示编辑框
-    flex-wrap: nowrap;
-  }
-
-  .selected-item {
-    display: flex;
     align-items: center;
-    justify-content: space-between;
-    padding: 6px 10px;
+    justify-content: center;
+    gap: 8px;
+    border-radius: 8px;
     background-color: $my-bg-hover;
-    border-radius: 6px;
-    cursor: pointer;
-    transition: background-color 0.2s;
 
-    &:hover {
-      background-color: rgba(144, 147, 153, 0.15);
-      .remove-icon {
-        opacity: 1;
-      }
-    }
-
-    .name-text {
-      font-size: 13px;
-      color: $my-text-main;
-      flex: 1;
-      user-select: none;
-    }
-
-    .remove-icon {
-      font-size: 14px;
+    .el-icon {
+      font-size: 26px;
       color: $my-text-sub;
-      opacity: 0;
-      transition: all 0.2s;
-
-      &:hover {
-        color: var(--el-color-danger);
-      }
-    }
-
-    .edit-input {
-      width: 100%;
     }
   }
 
-  .empty-tip {
-    width: 100%;
+  .tip {
+    font-size: 13px;
+    color: $my-text-main;
     text-align: center;
-    font-size: 12px;
-    color: $my-text-sub;
-    margin-top: 20px;
+    line-height: 1.6;
+
+    .hint {
+      display: block;
+      font-size: 11px;
+      color: $my-text-sub;
+      margin-top: 2px;
+    }
   }
 }
 
 .drawer-footer {
-  padding: 0 20px 20px;
-
-  .btn-confirm {
-    width: 100%;
-    border-radius: 8px;
-    height: 40px;
-  }
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
 }
 </style>
