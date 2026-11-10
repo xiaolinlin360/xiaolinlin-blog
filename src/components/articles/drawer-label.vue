@@ -160,7 +160,6 @@ const handleRemove = (label: Labels) => {
   } else {
     deletedLabels.value.push(label)
   }
-  console.log(deletedLabels.value)
 }
 
 const CancelHandleRemove = (label: Labels) => {

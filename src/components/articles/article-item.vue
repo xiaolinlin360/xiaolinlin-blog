@@ -99,10 +99,6 @@ defineEmits<{
 }>()
 
 const coverUrl = computed(() => {
-  console.log(props.article)
-
-  // 假设后端有静态文件服务，这里先写个假地址，实际请换成你的文件服务器地址
-  // return `http://localhost:3001/upload/${props.article.cover_file_id}`
   return 'https://picsum.photos/200/200?random=' + props.article.id.slice(0, 5)
 })
 

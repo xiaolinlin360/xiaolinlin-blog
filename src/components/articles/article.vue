@@ -123,10 +123,8 @@ const fetchData = async () => {
       pageSize: pageSize.value,
       subset_id: props.subsetId ? props.subsetId : undefined,
     })
-    console.log(res.data.articles)
 
     articles.value = res.data.articles || []
-    console.log(articles.value)
   } catch (error) {
     console.error('获取文章列表失败', error)
   } finally {

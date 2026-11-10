@@ -10,7 +10,13 @@
 
     <!-- 右侧：Markdown 编辑与实时预览 -->
     <div class="editor-wrapper">
-      <div class="editor-container">
+      <div
+        class="editor-container"
+        @dragenter="handleDragEnter"
+        @dragover="handleDragOver"
+        @dragleave="handleDragLeave"
+        @drop="handleDrop"
+        @paste="handlePaste">
         <!-- 输入区 -->
         <div class="editor-pane">
           <!-- 隐藏的文件上传框 -->
@@ -26,7 +32,7 @@
             ref="inputRef"
             v-model="draftContent"
             type="textarea"
-            placeholder="在此输入 Markdown 内容..."
+            placeholder="在此输入 Markdown 内容...（可直接拖拽或粘贴图片）"
             class="markdown-input"
             @focus="handleFocus"
             @blur="handleBlur" />
@@ -43,6 +49,12 @@
               :fade="false"
               custom-id="notes" />
           </div>
+        </div>
+
+        <!-- 拖拽提示遮罩：pointer-events:none，不挡住 drop 事件 -->
+        <div v-if="isDragging" class="drop-overlay">
+          <el-icon><UploadFilled /></el-icon>
+          <span>松开鼠标，把图片插入到光标处</span>
         </div>
       </div>
 
@@ -64,6 +76,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onBeforeUnmount, watch, nextTick } from 'vue'
 import { ElMessageBox, ElMessage, ElInput } from 'element-plus'
+import { UploadFilled } from '@element-plus/icons-vue'
 import NotesItem, { type Note } from './notes-item.vue'
 import MarkdownRender, { removeCustomComponents, setCustomComponents } from 'markstream-vue'
 import NoteImage from './note-image.vue'
@@ -74,7 +87,8 @@ import {
   getLocalImageId,
   registerLocalImage,
 } from './local-image'
-import { getNotes, createNote, deleteNote } from '@/api/notes' // 根据你的实际路径调整
+import { getNotes, insertNotes, deleteNotes } from '@/api/notes'
+import http, { url as API_BASE } from '@/utils/http'
 
 const props = defineProps<{
   subset_id?: string
@@ -96,7 +110,7 @@ setCustomComponents(NOTES_RENDER_ID, { image: NoteImage })
 
 const isDark = computed(() => document.documentElement.classList.contains('dark'))
 
-// ================= 图片上传与处理逻辑 =================
+// 图片上传与处理逻辑
 
 // 1. 触发文件选择
 const triggerUpload = () => {
@@ -123,16 +137,17 @@ const insertAtCursor = (insertText: string) => {
   })
 }
 
-// 3. 选择文件后只插入短 token，File 保存在 local-image 注册表里。
-//    不要把 base64 写进 Markdown：textarea 会变成超大字符串，
-//    Markdown 每次按键都要重新解析，预览也会被拖慢。
-const handleFileChange = (e: Event) => {
-  const target = e.target as HTMLInputElement
-  const files = Array.from(target.files ?? [])
-  target.value = '' // 允许重复选择同一张图
+// 3. 把一批 File 变成 token 插到光标处。
+//    按钮选择 / 拖拽 / 粘贴三条入口都走这里，逻辑只此一份。
+const insertImageFiles = (files: File[]) => {
+  const images = files.filter((file) => file.type.startsWith('image/'))
+  if (images.length === 0) {
+    if (files.length > 0) ElMessage.warning('只能插入图片文件')
+    return
+  }
+  if (images.length < files.length) ElMessage.warning('已忽略非图片文件')
 
-  const insertText = files
-    .filter((file) => file.type.startsWith('image/'))
+  const insertText = images
     .map((file) => {
       const id = registerLocalImage(file)
       // alt 里的 ] ( ) 会破坏 Markdown 语法
@@ -141,20 +156,115 @@ const handleFileChange = (e: Event) => {
     })
     .join('')
 
-  if (insertText) insertAtCursor(insertText)
+  // 拖拽/粘贴时输入框可能还没聚焦，先切编辑态让右侧预览出现
+  isEditing.value = true
+  insertAtCursor(insertText)
 }
 
-// ================= 提交与接口替换逻辑 =================
+// 4. 点"添加图片"按钮 → 隐藏 input
+const handleFileChange = (e: Event) => {
+  const target = e.target as HTMLInputElement
+  const files = Array.from(target.files ?? [])
+  target.value = '' // 允许重复选择同一张图
+  insertImageFiles(files)
+}
 
-// 真实的上传接口，请在此处替换为你的业务代码
-const uploadImageApi = async (_file: File): Promise<string> => {
-  // TODO: 替换为真实上传，例如：
-  // const formData = new FormData()
-  // formData.append('file', file)
-  // const { data } = await axios.post('/api/upload', formData)
-  // return data.url
+// 5. 拖拽 / 粘贴
+const isDragging = ref(false)
+let dragDepth = 0
 
-  throw new Error('请先实现 uploadImageApi 上传接口')
+/** 拖选中的文字也会触发 drag 事件，只有拖"文件"才处理 */
+const isFileDrag = (e: DragEvent) => Array.from(e.dataTransfer?.types ?? []).includes('Files')
+
+const handleDragEnter = (e: DragEvent) => {
+  if (!isFileDrag(e)) return
+  e.preventDefault()
+  dragDepth++ // 进出子元素会反复触发，用计数避免遮罩闪烁
+  isDragging.value = true
+}
+
+const handleDragOver = (e: DragEvent) => {
+  if (!isFileDrag(e)) return
+  e.preventDefault() // 不阻止默认行为，浏览器不允许 drop
+  if (e.dataTransfer) e.dataTransfer.dropEffect = 'copy'
+}
+
+const handleDragLeave = (e: DragEvent) => {
+  if (!isFileDrag(e)) return
+  dragDepth = Math.max(0, dragDepth - 1)
+  if (dragDepth === 0) isDragging.value = false
+}
+
+const handleDrop = (e: DragEvent) => {
+  if (!isFileDrag(e)) return
+  e.preventDefault()
+  dragDepth = 0
+  isDragging.value = false
+
+  const files = Array.from(e.dataTransfer?.files ?? [])
+  if (files.length === 0) return
+
+  const textarea = inputRef.value?.textarea
+  const wasFocused = !!textarea && document.activeElement === textarea
+  inputRef.value?.focus() // 先让 textarea 拿到焦点，插入位置才稳定
+
+  // 拖进未聚焦的输入框时，光标的默认位置是 0（会把图插到最前面）。
+  // 这种情况统一追加到末尾，符合直觉。
+  if (textarea && !wasFocused) {
+    const end = draftContent.value.length
+    textarea.setSelectionRange(end, end)
+  }
+
+  insertImageFiles(files)
+}
+
+/** 直接 Ctrl+V 粘贴截图（普通文本粘贴不受影响） */
+const handlePaste = (e: ClipboardEvent) => {
+  const files = Array.from(e.clipboardData?.items ?? [])
+    .filter((item) => item.kind === 'file' && item.type.startsWith('image/'))
+    .map((item) => item.getAsFile())
+    .filter((f): f is File => !!f)
+
+  if (files.length === 0) return
+  e.preventDefault() // 否则浏览器会把图片当成文件名/路径塞进输入框
+  insertImageFiles(files)
+}
+
+// 提交与接口替换逻辑
+
+// ================= 图片上传接口 =================
+
+/** 后端 POST /files/uploadFile 的响应体 */
+interface UploadFileRes {
+  code: number
+  message: string
+  data: {
+    url: string // 形如 /data/<fileId>/<文件名>
+    file_name: string
+    size: number
+    type: string
+  }
+}
+
+const uploadImageApi = async (file: File): Promise<string> => {
+  const formData = new FormData()
+  formData.append('file', file)
+
+  // 不要手动设置 Content-Type，交给 axios 自动补 multipart 的 boundary。
+  // 图片通常几 MB，这里单独放宽超时（http.ts 里默认只有 5s）。
+  const res = await http.post<any, UploadFileRes>('/files/uploadFile', formData, {
+    timeout: 60000,
+  })
+
+  // 后端返回的是 /data/... 这种相对路径。前端跑在 5173、后端在 3001，
+  // 直接写进 markdown 会被浏览器解析成前端域名的路径（5173/data/...）→ 404。
+  // 用 new URL 拼接：API_BASE 带不带尾斜杠都能得到正确地址，
+  // 也不会拼出 http://host:3001//data/... 这种双斜杠（express 静态目录会 404）。
+  try {
+    return new URL(res.data.url, API_BASE).href
+  } catch {
+    return `${API_BASE.replace(/\/+$/, '')}${res.data.url}`
+  }
 }
 
 // 扫描内容中的本地图片 token，依次上传并替换为真实 URL
@@ -187,7 +297,7 @@ const processImagesAndReplace = async (content: string): Promise<string> => {
   }
 }
 
-// ================= 光标控制与自动滚动逻辑 =================
+// 光标控制与自动滚动逻辑
 
 let scrollTimer: ReturnType<typeof setTimeout> | null = null
 const doScrollToBottom = () => {
@@ -231,7 +341,7 @@ const handleBlur = (event: FocusEvent) => {
   isEditing.value = false
 }
 
-// ================= 生命周期与基础操作逻辑 =================
+// 生命周期与基础操作逻辑
 
 const fetchNotes = async () => {
   loading.value = true
@@ -260,7 +370,7 @@ const handleSubmit = async () => {
     }
 
     // 2. 调用新建笔记接口
-    await createNote({
+    await insertNotes({
       title: '无标题随笔',
       content: finalContent,
       subset_id: props.subset_id || null,
@@ -299,7 +409,7 @@ const handleDelete = async (id: string) => {
   }
 
   try {
-    await deleteNote(id)
+    await deleteNotes(id)
     notes.value = notes.value.filter((n) => n.id !== id)
   } catch (error) {
     console.error('删除随笔失败', error)
@@ -358,10 +468,34 @@ onBeforeUnmount(() => {
 }
 
 .editor-container {
+  position: relative; /* 拖拽遮罩的定位基准 */
   display: flex;
   flex: 1;
   min-height: 0;
   overflow: hidden;
+}
+
+/* 拖拽提示遮罩 */
+.drop-overlay {
+  position: absolute;
+  inset: 8px;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  border: 2px dashed var(--el-color-primary);
+  border-radius: 8px;
+  background-color: var(--el-color-primary-light-9);
+  color: var(--el-color-primary);
+  font-size: 14px;
+  /* 关键：不拦截鼠标事件，否则遮罩会挡住 dragleave/drop，导致闪烁 */
+  pointer-events: none;
+
+  .el-icon {
+    font-size: 32px;
+  }
 }
 
 /* 输入区 */
