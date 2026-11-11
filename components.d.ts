@@ -50,6 +50,7 @@ declare module 'vue' {
     NoteImage: typeof import('./src/components/notesview/note-image.vue')['default']
     Notes: typeof import('./src/components/notesview/notes.vue')['default']
     NotesItem: typeof import('./src/components/notesview/notes-item.vue')['default']
+    Resources: typeof import('./src/components/resources/resources.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
     Subset: typeof import('./src/components/filesview/subset.vue')['default']

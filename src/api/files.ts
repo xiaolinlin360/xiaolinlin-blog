@@ -41,6 +41,20 @@ export const getTotalFile = () => {
   return http.post<any, TotalFileRes>('/files/getTotalFile')
 }
 
+// 获取 data 目录占用（总览页「本地文件」卡片用）
+interface StorageSizeRes {
+  code: number
+  message: string
+  data: {
+    bytes: number // 字节数
+    count: number // 文件个数
+    text: string // 已格式化的文案，如 434.36 MB
+  }
+}
+export const getStorageSize = () => {
+  return http.post<any, StorageSizeRes>('/files/getStorageSize')
+}
+
 //上传文件
 interface FormDataFile {
   gallery_id?: string | null
