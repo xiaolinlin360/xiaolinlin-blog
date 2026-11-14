@@ -8,7 +8,8 @@
           :key="item.id"
           :article="item"
           @edit="handleEdit"
-          @delete="handleDelete" />
+          @delete="handleDelete"
+          @comment="handleComment" />
         <el-empty v-if="!loading && articles.length === 0" description="暂无文章数据" />
       </div>
 
@@ -80,6 +81,9 @@
 
     <!-- 发布 / 编辑文章抽屉：新建与编辑复用同一个组件 -->
     <DrawerArticle ref="articleDrawerRef" @success="refresh" />
+
+    <!-- 文章评论区（giscus） -->
+    <DrawerArticleComments ref="commentsRef" />
   </div>
 </template>
 
@@ -92,8 +96,10 @@ import type { Article } from '@/api/blog'
 import { getLabels, type Labels, insertLabels } from '@/api/labels'
 import DrawerLabel from './drawer-label.vue'
 import DrawerArticle from './drawer-article.vue'
+import DrawerArticleComments from './drawer-article-comments.vue'
 const drawerVisible = ref(false)
 const articleDrawerRef = ref<InstanceType<typeof DrawerArticle>>()
+const commentsRef = ref<InstanceType<typeof DrawerArticleComments>>()
 
 const props = defineProps<{
   subsetId: string | undefined
@@ -187,6 +193,11 @@ onMounted(fetchLabels)
 // 编辑按钮点击 → 打开抽屉（带 id 走回显）
 const handleEdit = (article: Article) => {
   articleDrawerRef.value?.open(article.id)
+}
+
+// 点卡片上的「评论」→ 打开该文章的 giscus 评论区
+const handleComment = (article: Article) => {
+  commentsRef.value?.open(article)
 }
 
 // 新建按钮点击（由 BlogView 的"发布文章"按钮调用）

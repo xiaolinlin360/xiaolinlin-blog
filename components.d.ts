@@ -16,6 +16,7 @@ declare module 'vue' {
     Commonnt: typeof import('./src/components/overview/commonnt.vue')['default']
     Datas: typeof import('./src/components/overview/datas.vue')['default']
     DrawerArticle: typeof import('./src/components/articles/drawer-article.vue')['default']
+    DrawerArticleComments: typeof import('./src/components/articles/drawer-article-comments.vue')['default']
     DrawerGallery: typeof import('./src/components/gallery/drawer-gallery.vue')['default']
     DrawerLabel: typeof import('./src/components/articles/drawer-label.vue')['default']
     DrawerSubset: typeof import('./src/components/filesview/drawer-subset.vue')['default']

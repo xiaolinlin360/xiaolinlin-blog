@@ -44,9 +44,9 @@
             <span class="stat-item"
               ><el-icon><Star /></el-icon> 0</span
             >
-            <span class="stat-item"
-              ><el-icon><ChatDotRound /></el-icon> 0</span
-            >
+            <span class="stat-item clickable" title="查看评论" @click="$emit('comment', article)">
+              <el-icon><ChatDotRound /></el-icon> 评论
+            </span>
             <!-- 附件按钮：点击复制 file_urls 原始数组 -->
             <span
               v-if="article.file_urls?.length"
@@ -97,6 +97,7 @@ const props = defineProps<{
 defineEmits<{
   (e: 'edit', article: Article): void
   (e: 'delete', id: string): void
+  (e: 'comment', article: Article): void
 }>()
 
 const coverUrl = computed(() => {
@@ -256,6 +257,16 @@ const copyLabelId = async (id: string) => {
 
             .el-icon {
               font-size: 14px;
+            }
+
+            // 「评论」入口：可点击
+            &.clickable {
+              cursor: pointer;
+              transition: color 0.2s;
+
+              &:hover {
+                color: var(--el-color-primary);
+              }
             }
           }
 
