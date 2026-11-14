@@ -14,10 +14,13 @@
         <el-icon :size="20" class="action-icon"><Message /></el-icon>
       </el-badge>
 
-      <div class="action-item">
+      <div class="action-item user-info">
         <el-avatar :size="32" :src="avatarUrl" class="user-avatar">
           <el-icon><UserFilled /></el-icon>
         </el-avatar>
+        <span v-if="userStore.userData.name" class="user-name">
+          {{ userStore.userData.name }}
+        </span>
       </div>
 
       <!-- 太阳图标 -->
@@ -36,9 +39,12 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
+import { useRouter } from 'vue-router'
+import { ElMessage, ElMessageBox } from 'element-plus'
 import { Message, UserFilled, Sunny, Moon } from '@element-plus/icons-vue'
 import { useDark, useToggle } from '@vueuse/core'
 import MessageDrawer from '@/components/MessageDrawer/MessageDrawer.vue'
+import { useUserStore } from '@/stores/index'
 // --- Props 定义 (可通过父组件传入) ---
 interface Props {
   title?: string
@@ -58,11 +64,25 @@ const isDark = useDark() // 当前主题是否为暗黑
 const toggleDark = useToggle(isDark) // 切换主题
 const drawerVisible = ref(false) // 私信抽屉是否可见
 // const messageDrawerRef = ref<MessageDrawer>() // 私信抽屉实例引用
+// --- 登录态 ---
+const userStore = useUserStore()
+const router = useRouter()
 // --- 事件处理 ---
-// 显式声明函数返回类型
-const handleLogout = (): void => {
-  // 退出逻辑，例如清空 token 并跳转
-  console.log('执行退出登录')
+// 退出登录：清 token + 清用户信息 + 回登录页
+const handleLogout = async (): Promise<void> => {
+  try {
+    await ElMessageBox.confirm('确定要退出登录吗？', '提示', {
+      type: 'warning',
+      confirmButtonText: '退出',
+      cancelButtonText: '取消',
+    })
+  } catch {
+    return // 用户点了取消
+  }
+
+  userStore.logout()
+  ElMessage.success('已退出登录')
+  router.push('/login')
 }
 </script>
 
@@ -134,6 +154,21 @@ const handleLogout = (): void => {
 
     .action-icon {
       color: $my-text-main;
+    }
+
+    /* 头像 + 用户名 */
+    .user-info {
+      gap: 8px;
+      cursor: default;
+    }
+
+    .user-name {
+      font-size: 13px;
+      color: $my-text-main;
+      max-width: 120px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
 
     /* 调整红点位置 */

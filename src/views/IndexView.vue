@@ -1,28 +1,44 @@
 <template>
-  <div class="index-layout">
-    <!-- 左侧菜单栏 -->
-    <div class="layout-sidebar">
-      <MenuBar />
-    </div>
+  <div class="index-page">
+    <!-- 顶栏跟着布局走：登录后才出现，/login 是整页无顶栏 -->
+    <HeadBar />
 
-    <!-- 右侧主内容区 -->
-    <div class="layout-content">
-      <router-view></router-view>
+    <div class="index-layout">
+      <!-- 左侧菜单栏 -->
+      <div class="layout-sidebar">
+        <MenuBar />
+      </div>
+
+      <!-- 右侧主内容区 -->
+      <div class="layout-content">
+        <router-view></router-view>
+      </div>
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
+import HeadBar from '@/components/bar/HeadBar.vue'
 import MenuBar from '@/components/bar/MenuBar.vue'
 </script>
 
 <style lang="scss" scoped>
+/* 外层用 flex 纵向排：HeadBar 60px + 剩余高度，
+   比原来写死 calc(100vh - 60px) 更稳（HeadBar 改高度不用同步改这里） */
+.index-page {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+}
+
 .index-layout {
+  flex: 1;
+  min-height: 0; /* 关键：允许子项在 flex 里滚动，而不是把父级撑高 */
   display: flex; /* 启用 Flex 布局，实现左右并排 */
   width: 100%;
-  height: calc(100vh - 60px); /* 减去顶部 HeadBar 的高度（假设是 60px） */
   overflow: hidden; /* 防止整体出现滚动条 */
-  background-color: #f5f6f8; /* 整体背景色 */
+  background-color: $my-bg-page; /* 整体背景色 */
 }
 
 .layout-sidebar {

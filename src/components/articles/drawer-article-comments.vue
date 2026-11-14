@@ -38,7 +38,7 @@ const giscus = {
   repoId: 'R_kgDOVq6Rkg',
   category: 'General',
   categoryId: 'DIC_kwDOVq6Rks4DK50m',
-} as const
+} as const // 防止修改，定义为常量
 
 const visible = ref(false)
 const article = ref<Pick<Article, 'id' | 'title'>>({ id: '', title: '' })
