@@ -1,106 +1,156 @@
 <template>
-  <div class="comments-card">
+  <div class="guestbook-card">
     <div class="card-header">
-      <span class="title">评论 {{ total }}</span>
+      <span class="title">留言 {{ total }}</span>
     </div>
 
-    <!-- 评论列表区域，高度自适应并支持内部滚动 -->
-    <div class="comment-list">
-      <div class="comment-item" v-for="item in commentList" :key="item.id">
-        <!-- 先放着，等有时间再处理 -->
-        <el-avatar :size="36" :src="item.imgurl" class="avatar" />
+    <!-- 发表留言：只要称呼 + 内容 -->
+    <div class="write-box">
+      <div class="write-row">
+        <el-input
+          v-model="form.nickname"
+          maxlength="30"
+          placeholder="你的称呼"
+          class="nick-input" />
+        <el-button type="primary" size="small" :loading="submitting" @click="handleSubmit">
+          发表
+        </el-button>
+      </div>
+      <el-input
+        v-model="form.content"
+        type="textarea"
+        :rows="2"
+        maxlength="500"
+        placeholder="说点什么..."
+        class="content-input" />
+    </div>
 
-        <div class="comment-body">
-          <div class="comment-header">
-            <span class="nickname">{{ item.name }}</span>
+    <!-- 留言列表：内部独立滚动 -->
+    <div class="guestbook-list">
+      <div v-for="item in list" :key="item.id" class="guestbook-item">
+        <div class="avatar">{{ item.nickname.slice(0, 1) }}</div>
+
+        <div class="body">
+          <div class="header-row">
+            <span class="nickname">{{ item.nickname }}</span>
             <span class="time">{{ formatTime(item.created_at) }}</span>
             <el-icon class="delete-icon" @click="handleDelete(item.id)"><Delete /></el-icon>
           </div>
-          <p class="comment-text">{{ item.content }}</p>
-
-          <div class="comment-tags">
-            <el-tag size="small" class="tag-item">专栏文章</el-tag>
-            <span v-if="item.is_complained === 1" class="report-text">已投诉</span>
-          </div>
+          <p class="content">{{ item.content }}</p>
         </div>
       </div>
 
-      <!-- 当没有数据时显示占位 -->
-      <el-empty v-if="commentList.length === 0" description="暂无评论" :image-size="60" />
+      <el-empty v-if="list.length === 0" description="还没有留言" :image-size="60" />
     </div>
 
-    <!-- 分页器区域固定在底部 -->
+    <!-- 分页器固定在底部 -->
     <div class="pagination-wrapper">
       <el-pagination
-        v-model:current-page="currentPage"
+        v-model:current-page="pageNum"
         v-model:page-size="pageSize"
-        :page-sizes="[100, 200, 300, 400]"
-        size="default"
-        layout="total, sizes, prev, pager, next, jumper"
+        :page-sizes="[5, 10, 20]"
+        layout="prev, pager, next"
         :total="total"
-        @size-change="handleSizeChange"
-        @current-change="handleCurrentChange" />
+        small
+        @current-change="fetchList"
+        @size-change="handleSizeChange" />
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
+import { ElMessage, ElMessageBox } from 'element-plus'
 import { Delete } from '@element-plus/icons-vue'
-import { getComments, getTotalComment, type Comment, deleteComment } from '@/api/comments'
+import {
+  getGuestbook,
+  getTotalGuestbook,
+  insertGuestbook,
+  deleteGuestbook,
+  type Guestbook,
+} from '@/api/guestbook'
 import formatTime from '@/utils/formatTime'
 
-const currentPage = ref(1)
+const list = ref<Guestbook[]>([])
+const total = ref(0)
+const pageNum = ref(1)
 const pageSize = ref(5)
-let total = ref(0)
-// 当前展示的评论数据
-const commentList = ref<Comment[]>([])
-// 模拟从后端根据页码获取数据的函数
-const fetchComments = async (page: number) => {
-  const totalRes = await getTotalComment()
+const submitting = ref(false)
+const form = ref({ nickname: '', content: '' })
+
+const fetchList = async () => {
+  const [listRes, totalRes] = await Promise.all([
+    getGuestbook({ pageNum: pageNum.value, pageSize: pageSize.value }),
+    getTotalGuestbook(),
+  ])
+  list.value = listRes.data.guestbooks
   total.value = totalRes.data.total
-  const res = await getComments({ pageNum: page, pageSize: pageSize.value })
-  commentList.value = res.data.comments
 }
 
-// 监听页码变化
-const handleSizeChange = (val: number) => {
-  pageSize.value = val
-  fetchComments(currentPage.value)
-}
-const handleCurrentChange = (val: number) => {
-  currentPage.value = val
-  fetchComments(val)
+const handleSizeChange = () => {
+  pageNum.value = 1
+  fetchList()
 }
 
-// 删除评论
-const handleDelete = async (id: number) => {
-  await deleteComment(id)
-  fetchComments(currentPage.value)
+// 发表留言
+const handleSubmit = async () => {
+  const nickname = form.value.nickname.trim()
+  const content = form.value.content.trim()
+
+  if (!nickname) {
+    ElMessage.warning('请填写你的称呼')
+    return
+  }
+  if (!content) {
+    ElMessage.warning('留言内容不能为空')
+    return
+  }
+
+  submitting.value = true
+  try {
+    await insertGuestbook({ nickname, content })
+    ElMessage.success('留言成功')
+    form.value = { nickname: '', content: '' }
+    pageNum.value = 1 // 新留言在最前面，回到第一页
+    await fetchList()
+  } finally {
+    submitting.value = false
+  }
 }
-// 初始化
-onMounted(() => {
-  fetchComments(currentPage.value)
-})
+
+// 删除留言
+const handleDelete = async (id: string) => {
+  const confirm = await ElMessageBox.confirm('确定删除这条留言吗？', '提示', {
+    type: 'warning',
+  }).catch(() => false)
+  if (!confirm) return
+
+  await deleteGuestbook(id)
+  ElMessage.success('已删除')
+  await fetchList()
+}
+
+onMounted(fetchList)
 </script>
 
 <style scoped lang="scss">
-.comments-card {
+.guestbook-card {
   background-color: $my-bg-card;
   border-radius: 8px;
   padding: 16px;
   box-shadow: 0 2px 12px $my-shadow-color;
   display: flex;
   flex-direction: column;
-  height: 100%; /* 关键：高度 100% 与左侧对齐 */
-  overflow: hidden; /* 防止内容溢出圆角卡片 */
+  height: 100%; /* 高度 100% 与左侧图表对齐 */
+  overflow: hidden;
   transition:
     background-color 0.3s,
     box-shadow 0.3s;
 
   .card-header {
-    margin-bottom: 16px;
-    flex-shrink: 0; /* 头部固定不压缩 */
+    margin-bottom: 12px;
+    flex-shrink: 0;
+
     .title {
       font-size: 16px;
       font-weight: 600;
@@ -108,14 +158,41 @@ onMounted(() => {
     }
   }
 
-  .comment-list {
-    flex: 1; /* 占据剩余全部空间 */
-    overflow-y: auto; /* 内部独立滚动 */
+  /* 写留言 */
+  .write-box {
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding-bottom: 12px;
+    margin-bottom: 12px;
+    border-bottom: 1px solid $my-border-color;
+
+    .write-row {
+      display: flex;
+      gap: 8px;
+
+      .nick-input {
+        flex: 1;
+      }
+    }
+
+    .content-input {
+      :deep(.el-textarea__inner) {
+        resize: none;
+      }
+    }
+  }
+
+  /* 留言列表 */
+  .guestbook-list {
+    flex: 1;
+    overflow-y: auto;
     display: flex;
     flex-direction: column;
     gap: 16px;
-    padding-right: 4px; /* 为滚动条留一点空间 */
-    margin-bottom: 16px;
+    padding-right: 4px;
+    margin-bottom: 12px;
 
     &::-webkit-scrollbar {
       width: 4px;
@@ -128,7 +205,7 @@ onMounted(() => {
       background: transparent;
     }
 
-    .comment-item {
+    .guestbook-item {
       display: flex;
       gap: 12px;
       padding-bottom: 12px;
@@ -138,58 +215,63 @@ onMounted(() => {
         border-bottom: none;
       }
 
-      .comment-body {
+      /* 用称呼首字做头像，免去上传头像 */
+      .avatar {
+        flex-shrink: 0;
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 15px;
+        font-weight: 600;
+        color: var(--el-color-primary);
+        background-color: var(--el-color-primary-light-9);
+      }
+
+      .body {
         flex: 1;
+        min-width: 0;
         display: flex;
         flex-direction: column;
         gap: 6px;
 
-        .comment-header {
+        .header-row {
           display: flex;
           align-items: center;
           gap: 8px;
           font-size: 12px;
           color: $my-text-sub;
+
           .nickname {
             font-weight: 600;
             color: $my-text-main;
           }
+
           .delete-icon {
             margin-left: auto;
             cursor: pointer;
+
             &:hover {
               color: #f56c6c;
             }
           }
         }
 
-        .comment-text {
+        .content {
           font-size: 13px;
           color: $my-text-main;
           margin: 0;
-          line-height: 1.4;
-        }
-
-        .comment-tags {
-          display: flex;
-          align-items: center;
-          gap: 8px;
-          .tag-item {
-            background-color: rgba(43, 92, 255, 0.1);
-            border: none;
-            color: #2b5cff;
-          }
-          .report-text {
-            font-size: 12px;
-            color: #f56c6c;
-          }
+          line-height: 1.5;
+          word-break: break-word;
         }
       }
     }
   }
 
   .pagination-wrapper {
-    flex-shrink: 0; /* 分页器固定不压缩 */
+    flex-shrink: 0;
     display: flex;
     justify-content: flex-end;
 
