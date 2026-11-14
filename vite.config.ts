@@ -30,4 +30,8 @@ export default defineConfig({
       },
     },
   },
+  server: {
+    // 允许所有 .trycloudflare.com 的子域名访问
+    allowedHosts: ['.trycloudflare.com'],
+  },
 })

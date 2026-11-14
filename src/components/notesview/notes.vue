@@ -405,6 +405,7 @@ const handleDelete = async (id: string) => {
 
   try {
     await deleteNotes(id)
+    ElMessage.success('删除成功')
     notes.value = notes.value.filter((n) => n.id !== id)
   } catch (error) {
     console.error('删除随笔失败', error)
