@@ -1,0 +1,67 @@
+// src/style/variables.scss
+//
+// 只放「变量 + mixin」，不输出任何 CSS 规则。
+// 这样每个组件 @use 它都不会重复生成 :root（后台那份是放在这里的，会重复，这里改掉了）。
+//
+// 配色取自 caotx.cn 实测值（浏览器里 F12 能看到），
+// 但变量命名沿用后台的规范：bg-page / bg-card / text-main / border-color ...
+
+@use "sass:map";
+
+$themes: (
+  light: (
+    bg-page: #f5f5f5,
+    // 页面底色
+    bg-card: #ffffff,
+    // 卡片、内容块底色
+    bg-hover: #f0f0f0,
+    // 悬浮态底色
+    text-main: #333333,
+    // 主文字
+    text-sub: #666666,
+    // 次要文字
+    text-light: #999999,
+    // 更弱的文字（时间、备注）
+    border-color: rgba(0, 0, 0, 0.14),
+    // 细边框
+    accent-color: #1479d1,
+    // 品牌蓝（链接、高亮）
+    grid-color: rgba(200, 200, 200, 0.3),
+    // 背景网格线
+    shadow-color: rgba(15, 24, 38, 0.18),
+    // 卡片投影
+  ),
+  dark: (
+    bg-page: #18202a,
+    bg-card: #202a36,
+    bg-hover: #27333f,
+    text-main: #f5f7fa,
+    text-sub: rgba(255, 255, 255, 0.7),
+    text-light: rgba(255, 255, 255, 0.5),
+    border-color: rgba(255, 255, 255, 0.15),
+    accent-color: #75b9ff,
+    grid-color: rgba(255, 255, 255, 0.08),
+    shadow-color: rgba(0, 0, 0, 0.45),
+  ),
+);
+
+// 把某个主题的 key 展开成 --my-xxx 变量
+@mixin apply-theme($theme-name) {
+  $theme-map: map.get($themes, $theme-name);
+
+  @each $key, $value in $theme-map {
+    --my-#{$key}: #{$value};
+  }
+}
+
+// 暴露给 SCSS 的快捷变量（组件里可以直接写 color: $my-text-main）
+$my-bg-page: var(--my-bg-page);
+$my-bg-card: var(--my-bg-card);
+$my-bg-hover: var(--my-bg-hover);
+$my-text-main: var(--my-text-main);
+$my-text-sub: var(--my-text-sub);
+$my-text-light: var(--my-text-light);
+$my-border-color: var(--my-border-color);
+$my-accent-color: var(--my-accent-color);
+$my-grid-color: var(--my-grid-color);
+$my-shadow-color: var(--my-shadow-color);

@@ -1,0 +1,60 @@
+// src/style/style.scss
+// 全局入口：重置 + 主题变量落地 + 网格背景
+
+@use "./variables.scss" as *;
+
+/* 全局重置 */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* 亮色是默认值 */
+:root {
+  @include apply-theme(light);
+
+  /* 网格格子大小，想稀疏一点就改这里 */
+  --my-grid-size: 20px;
+}
+
+/* 手动切深色：给 html 加 .dark 类 */
+html.dark {
+  @include apply-theme(dark);
+}
+
+/* 还没做切换按钮时，跟随系统深色；想强制浅色就给 html 加 .light */
+@media (prefers-color-scheme: dark) {
+  :root:not(.light) {
+    @include apply-theme(dark);
+  }
+}
+
+html,
+body,
+#app {
+  min-height: 100%;
+}
+
+body {
+  font-family:
+    "Microsoft YaHei", "PingFang SC", "Noto Sans CJK SC", "Segoe UI", system-ui, -apple-system,
+    sans-serif;
+  color: var(--my-text-main);
+  background-color: var(--my-bg-page);
+
+  /* 网格背景：横向 + 纵向两条 1px 渐变线叠加，每 20px 一格 */
+  background-image:
+    linear-gradient(var(--my-grid-color) 1px, transparent 1px),
+    linear-gradient(90deg, var(--my-grid-color) 1px, transparent 1px);
+  background-size: var(--my-grid-size) var(--my-grid-size);
+
+  transition:
+    background-color 0.3s,
+    color 0.3s;
+}
+
+a {
+  color: var(--my-accent-color);
+  text-decoration: none;
+}

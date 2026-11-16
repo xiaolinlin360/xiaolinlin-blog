@@ -15,4 +15,12 @@ export default defineConfig({
       '@': fileURLToPath(new URL('./src', import.meta.url)),
     },
   },
+  css: {
+    preprocessorOptions: {
+      scss: {
+        // 全局注入变量，组件里不用每次手写 @use
+        additionalData: `@use "@/style/variables.scss" as *;`,
+      },
+    },
+  },
 })
