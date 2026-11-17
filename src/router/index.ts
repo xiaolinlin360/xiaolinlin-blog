@@ -1,9 +1,10 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import HomeView from '@/views/HomeView.vue'
 import PagePlaceholder from '@/views/PagePlaceholder.vue'
 
-// 五个页面先用同一个占位组件，后面一个一个替换成真页面
+// 首页已经做了，其余四个先用占位组件
 const routes = [
-  { path: '/', name: '首页', component: PagePlaceholder },
+  { path: '/', name: '首页', component: HomeView },
   { path: '/blog', name: '博客', component: PagePlaceholder },
   { path: '/gallery', name: '图库', component: PagePlaceholder },
   { path: '/notes', name: '随笔', component: PagePlaceholder },

@@ -87,7 +87,7 @@ onBeforeUnmount(() => window.removeEventListener('scroll', handleScroll))
 }
 
 .header-inner {
-  max-width: 920px;
+  max-width: var(--my-content-width);
   height: 100%;
   margin: 0 auto;
   padding: 0 24px;

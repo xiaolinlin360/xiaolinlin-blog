@@ -1,7 +1,7 @@
 // src/style/style.scss
 // 全局入口：重置 + 主题变量落地 + 网格背景
 
-@use "./variables.scss" as *;
+@use './variables.scss' as *;
 
 /* 全局重置 */
 * {
@@ -16,6 +16,9 @@
 
   /* 网格格子大小，想稀疏一点就改这里 */
   --my-grid-size: 20px;
+
+  /* 内容区最大宽度：首页三栏要这么宽，顶栏和 main 共用 */
+  --my-content-width: 1380px;
 }
 
 /* 手动切深色：给 html 加 .dark 类 */
@@ -38,7 +41,12 @@ body,
 
 body {
   font-family:
-    "Microsoft YaHei", "PingFang SC", "Noto Sans CJK SC", "Segoe UI", system-ui, -apple-system,
+    'Microsoft YaHei',
+    'PingFang SC',
+    'Noto Sans CJK SC',
+    'Segoe UI',
+    system-ui,
+    -apple-system,
     sans-serif;
   color: var(--my-text-main);
   background-color: var(--my-bg-page);

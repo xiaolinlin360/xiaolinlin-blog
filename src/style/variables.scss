@@ -6,7 +6,7 @@
 // 配色取自 caotx.cn 实测值（浏览器里 F12 能看到），
 // 但变量命名沿用后台的规范：bg-page / bg-card / text-main / border-color ...
 
-@use "sass:map";
+@use 'sass:map';
 
 $themes: (
   light: (
@@ -32,7 +32,7 @@ $themes: (
     // 卡片投影
   ),
   dark: (
-    bg-page: #18202a,
+    bg-page: #1a1a1a,
     bg-card: #202a36,
     bg-hover: #27333f,
     text-main: #f5f7fa,

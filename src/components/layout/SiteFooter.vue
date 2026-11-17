@@ -1,10 +1,8 @@
 <template>
   <footer class="site-footer">
     <div class="footer-inner">
-      <p>© {{ year }} 逸刻 · 春祺夏安，秋绥冬禧</p>
-
-      <!-- 备案号下来后，把下面这行取消注释并填上号 -->
-      <p class="icp">粤ICP备2026170399号</p>
+      <div>© {{ year }} 逸刻 · 春祺夏安，秋绥冬禧</div>
+      <div>粤ICP备2026170399号</div>
     </div>
   </footer>
 </template>
@@ -31,9 +29,7 @@ const year = new Date().getFullYear()
   font-size: 13px;
   line-height: 1.8;
   color: $my-text-light;
-
-  .icp {
-    font-size: 12px;
-  }
+  display: flex;
+  justify-content: space-between;
 }
 </style>
