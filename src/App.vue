@@ -17,6 +17,7 @@ import SiteFooter from '@/components/layout/SiteFooter.vue'
 .site-main {
   max-width: var(--my-content-width);
   margin: 0 auto;
+  padding: 0px 30px;
   // padding: 32px 24px 0;
   /* 底部留给 footer 自己的 margin-top */
   min-height: calc(100vh - 64px - 140px);

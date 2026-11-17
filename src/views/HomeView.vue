@@ -100,11 +100,11 @@ const welcome = '欢迎来自地球的朋友 🌏'
 </script>
 
 <style scoped lang="scss">
-/* 三栏：左 260 / 中间自适应 / 右 220 */
+/* 三栏：左 300 / 中间自适应 / 右 300 */
 .home-layout {
   display: grid;
   grid-template-columns: 300px minmax(0, 1fr) 300px;
-  gap: 50px;
+  gap: 40px;
   align-items: start;
 }
 
@@ -274,9 +274,9 @@ const welcome = '欢迎来自地球的朋友 🌏'
 }
 
 /* ---------- 响应式：窄了就先丢右栏，再丢左栏 ---------- */
-@media (max-width: 1240px) {
+@media (max-width: 1340px) {
   .home-layout {
-    grid-template-columns: 260px minmax(0, 1fr);
+    grid-template-columns: 300px minmax(0, 1fr);
   }
 
   .side-right {
