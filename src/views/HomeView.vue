@@ -59,13 +59,14 @@
 
     <!-- ③ 右栏 -->
     <aside class="side side-right">
-      <div class="right-placeholder">右侧装饰 / 技术栈（待做）</div>
+      <TechWall />
     </aside>
   </div>
 </template>
 
 <script setup lang="ts">
 import SideCard from '@/components/home/SideCard.vue'
+import TechWall from '@/components/home/TechWall.vue'
 
 // 先写死，以后接接口再换
 const stats = [
@@ -253,11 +254,11 @@ const welcome = '欢迎来自地球的朋友 🌏'
   min-height: 90vh;
 }
 
-.middle-placeholder,
-.right-placeholder {
+.middle-placeholder {
   display: flex;
   align-items: center;
   justify-content: center;
+  height: 90vh;
   border: 1px dashed $my-border-color;
   border-radius: 20px;
   background-color: $my-bg-card;
@@ -265,12 +266,10 @@ const welcome = '欢迎来自地球的朋友 🌏'
   color: $my-text-light;
 }
 
-.middle-placeholder {
-  height: 90vh;
-}
-
-.right-placeholder {
-  height: 320px;
+/* 右栏图标墙跟随滚动 */
+.side-right {
+  position: sticky;
+  top: 88px;
 }
 
 /* ---------- 响应式：窄了就先丢右栏，再丢左栏 ---------- */
