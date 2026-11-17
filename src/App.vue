@@ -1,11 +1,24 @@
-<script setup lang="ts"></script>
+<script setup lang="ts">
+import SiteHeader from '@/components/layout/SiteHeader.vue'
+import SiteFooter from '@/components/layout/SiteFooter.vue'
+</script>
 
 <template>
-  <h1>You did it!</h1>
-  <p>
-    Visit <a href="https://vuejs.org/" target="_blank" rel="noopener">vuejs.org</a> to read the
-    documentation
-  </p>
+  <SiteHeader />
+
+  <main class="site-main">
+    <RouterView />
+  </main>
+
+  <SiteFooter />
 </template>
 
-<style scoped></style>
+<style scoped lang="scss">
+.site-main {
+  max-width: 920px;
+  margin: 0 auto;
+  padding: 32px 24px 0;
+  /* 底部留给 footer 自己的 margin-top */
+  min-height: calc(100vh - 64px - 140px);
+}
+</style>
