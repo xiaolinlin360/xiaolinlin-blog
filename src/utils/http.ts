@@ -5,7 +5,8 @@ export const http = async <T>(method: string = 'GET', path: string, body: unknow
   const res = await fetch(API_BASE + path, {
     method,
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(body),
+    // GET / HEAD 带 body 浏览器会直接抛 TypeError，所以这两种只发空
+    body: method === 'GET' || method === 'HEAD' ? undefined : JSON.stringify(body),
   })
   const json = await res.json()
   if (json.code !== 200) {

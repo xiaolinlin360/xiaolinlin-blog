@@ -43,11 +43,13 @@
         />
       </picture>
     </div>
+    <TagAndLink />
   </section>
 </template>
 
 <script setup lang="ts">
 import { ref } from 'vue'
+import TagAndLink from '@/components/home/TagAndLink.vue'
 const isDark = ref(true) //先写死，后面再改
 </script>
 
