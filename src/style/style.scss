@@ -14,6 +14,7 @@
 
 /* 亮色是默认值 */
 :root {
+  color-scheme: light; /* 原生滚动条、表单控件跟着亮色 */
   @include apply-theme(light);
 
   /* 网格格子大小，想稀疏一点就改这里 */
@@ -25,12 +26,14 @@
 
 /* 手动切深色：给 html 加 .dark 类 */
 html.dark {
+  color-scheme: dark;
   @include apply-theme(dark);
 }
 
-/* 还没做切换按钮时，跟随系统深色；想强制浅色就给 html 加 .light */
+/* 没手动选过时跟随系统；手动选了 .light 就盖掉这段 */
 @media (prefers-color-scheme: dark) {
   :root:not(.light) {
+    color-scheme: dark;
     @include apply-theme(dark);
   }
 }
@@ -39,6 +42,19 @@ html,
 body,
 #app {
   min-height: 100%;
+}
+
+/* 切主题的那 0.35s 里，让所有颜色一起渐变，不然整页是「闪」一下；
+   useTheme.ts 里的 toggleDark 会在 350ms 后把这个类摘掉 */
+html.theme-transition,
+html.theme-transition *,
+html.theme-transition *::before,
+html.theme-transition *::after {
+  transition:
+    background-color 0.35s ease,
+    color 0.35s ease,
+    border-color 0.35s ease,
+    box-shadow 0.35s ease !important;
 }
 
 body {

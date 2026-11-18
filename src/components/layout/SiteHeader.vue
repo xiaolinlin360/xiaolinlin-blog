@@ -29,7 +29,6 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onBeforeUnmount } from 'vue'
-import { useDark, useToggle } from '@vueuse/core'
 import {
   HomeFilled,
   Reading,
@@ -39,6 +38,7 @@ import {
   Sunny,
   Moon,
 } from '@element-plus/icons-vue'
+import { isDark, toggleDark } from '@/composables/useTheme'
 
 const navItems = [
   { name: '首页', path: '/', icon: HomeFilled },
@@ -48,9 +48,7 @@ const navItems = [
   { name: '留言', path: '/guestbook', icon: ChatDotRound },
 ]
 
-// useDark 会往 <html> 上加/去 .dark 类，跟 style.scss 里那套主题对应
-const isDark = useDark()
-const toggleDark = useToggle(isDark)
+// 深浅色状态在 composables/useTheme.ts 里统一管，这里只管用
 
 // 滚过一点才给顶栏加毛玻璃，在最顶上时它完全透明
 const scrolled = ref(false)
