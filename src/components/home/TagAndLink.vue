@@ -28,6 +28,7 @@
         :href="link.href || '#'"
         :target="link.href?.startsWith('http') ? '_blank' : undefined"
         :title="link.name"
+        @click="handleClick($event, link)"
       >
         <!-- simple-icons 给的是 path 字符串，Element Plus 给的是组件，所以分两种画法 -->
         <svg v-if="link.path" viewBox="0 0 24 24" aria-hidden="true">
@@ -53,6 +54,7 @@ import {
   siGithub,
 } from 'simple-icons'
 import { Reading, Cloudy, Sunny, Picture, Avatar, MagicStick } from '@element-plus/icons-vue'
+import { skillClicks } from '@/composables/useSkillFx'
 
 interface BrandIcon {
   path: string
@@ -86,6 +88,8 @@ interface LinkItem {
   path?: string
   /** Element Plus 图标组件 */
   comp?: Component
+  /** 点了要做事（不是跳转）就写这里 */
+  onClick?: () => void
 }
 
 const links: LinkItem[] = [
@@ -96,9 +100,16 @@ const links: LinkItem[] = [
   { name: 'Light', comp: Sunny },
   { name: 'Album', comp: Picture },
   { name: 'Virtual Characters', comp: Avatar },
-  // Skills 要做特殊效果，等下一轮再动
-  { name: 'Skills', comp: MagicStick },
+  // 点一下：右栏图标墙依次淡出 → 随机打乱位置 → 依次淡入
+  { name: 'Skills', comp: MagicStick, onClick: () => skillClicks.value++ },
 ]
+
+/** 有点击逻辑的（目前只有 Skills）先拦掉跳转，再去播动画 */
+const handleClick = (event: MouseEvent, link: LinkItem) => {
+  if (!link.onClick) return
+  event.preventDefault()
+  link.onClick()
+}
 </script>
 
 <style scoped lang="scss">

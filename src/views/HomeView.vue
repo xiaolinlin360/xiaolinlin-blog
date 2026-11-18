@@ -267,10 +267,13 @@ const welcome = '欢迎来自地球的朋友 🌏'
   color: $my-text-light;
 }
 
-/* 右栏图标墙跟随滚动 */
+/* 左右两栏粘住不跟页面滚走，只有中栏的内容在滚。
+   能粘住靠的是上面 .home-layout 的 align-items: start：
+   侧栏高度就等于自己的内容高度，底下才有空间让它往下滑。 */
+.side-left,
 .side-right {
   position: sticky;
-  top: 88px;
+  top: 88px; /* 顶栏 64px + 留 24px 缝 */
 }
 
 /* ---------- 响应式：窄了就先丢右栏，再丢左栏 ---------- */
