@@ -2,7 +2,7 @@
   <section class="hero-card">
     <div class="hero-header">
       <div class="identity">
-        <!-- 暂时用渐变圆形 + 一个字占位，等你放真头像 -->
+        <!-- 暂时用渐变八边形 + 一个字占位；等公开接口做好，换成博主A的头像（users.imgurl） -->
         <div class="avatar">逸</div>
 
         <div class="intro">
@@ -78,7 +78,8 @@ const isDark = ref(true) //先写死，后面再改
     justify-content: center;
     width: 64px;
     height: 64px;
-    border-radius: 50%;
+    /* 圆润八边形：8 个角各磨一次。这条路径是按 64×64 画的，改尺寸要重新生成 */
+    clip-path: path('M59.72 37.48Q59.72 43.48 55.47 47.72L47.72 55.47Q43.48 59.72 37.48 59.72L26.52 59.72Q20.52 59.72 16.28 55.47L8.53 47.72Q4.28 43.48 4.28 37.48L4.28 26.52Q4.28 20.52 8.53 16.28L16.28 8.53Q20.52 4.28 26.52 4.28L37.48 4.28Q43.48 4.28 47.72 8.53L55.47 16.28Q59.72 20.52 59.72 26.52Z');
     font-size: 24px;
     font-weight: 700;
     color: #fff;
