@@ -67,11 +67,11 @@ const techList = [
   { name: 'Cloudflare', icon: siCloudflare },
 ]
 
-/** 用 index 直接算角度：范围 -9 ~ 9 度，看起来没有规律但每页一致 */
+/** 用 index 直接算角度：范围 -12 ~ 12 度，看起来没有规律但每页一致 */
 const rotationOf = (index: number) => `${((index * 7) % 25) - 12}deg`
 
-/** 横向微移：范围 -5 ~ 5 px */
-const offsetOf = (index: number) => `${((index * 3) % 11) - 5}px`
+/** 横向微移：范围 -14 ~ 14 px */
+const offsetOf = (index: number) => `${((index * 3) % 20) - 14}px`
 
 interface WallItem {
   name: string

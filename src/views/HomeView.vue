@@ -54,7 +54,7 @@
 
     <!-- ② 中栏 -->
     <main class="middle">
-      <div class="middle-placeholder">首页主体（待做）</div>
+      <HeroSection />
     </main>
 
     <!-- ③ 右栏 -->
@@ -67,6 +67,7 @@
 <script setup lang="ts">
 import SideCard from '@/components/home/SideCard.vue'
 import TechWall from '@/components/home/TechWall.vue'
+import HeroSection from '@/components/home/HeroSection.vue'
 
 // 先写死，以后接接口再换
 const stats = [
