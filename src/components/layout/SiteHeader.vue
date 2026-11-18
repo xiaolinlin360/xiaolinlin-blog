@@ -10,7 +10,8 @@
           :key="item.path"
           :to="item.path"
           class="nav-link"
-          :title="item.name">
+          :title="item.name"
+        >
           <component :is="item.icon" />
         </RouterLink>
       </nav>
@@ -19,7 +20,8 @@
         class="theme-btn"
         type="button"
         :title="isDark ? '切换到亮色' : '切换到深色'"
-        @click="toggleDark()">
+        @click="toggleDark()"
+      >
         <Moon v-if="isDark" />
         <Sunny v-else />
       </button>
@@ -41,8 +43,8 @@ import {
 import { isDark, toggleDark } from '@/composables/useTheme'
 
 const navItems = [
-  { name: '首页', path: '/', icon: HomeFilled },
-  { name: '博客', path: '/blog', icon: Reading },
+  { name: '博客', path: '/', icon: HomeFilled },
+  { name: '文章', path: '/article', icon: Reading },
   { name: '图库', path: '/gallery', icon: Picture },
   { name: '随笔', path: '/notes', icon: Notebook },
   { name: '留言', path: '/guestbook', icon: ChatDotRound },

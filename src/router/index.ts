@@ -6,6 +6,7 @@ import PagePlaceholder from '@/views/PagePlaceholder.vue'
 const routes = [
   { path: '/', name: '首页', component: HomeView },
   { path: '/blog', name: '博客', component: PagePlaceholder },
+  { path: '/article', name: '文章', component: PagePlaceholder },
   { path: '/gallery', name: '图库', component: PagePlaceholder },
   { path: '/notes', name: '随笔', component: PagePlaceholder },
   { path: '/guestbook', name: '留言', component: PagePlaceholder },

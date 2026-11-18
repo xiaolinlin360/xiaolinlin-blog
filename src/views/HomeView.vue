@@ -55,6 +55,7 @@
     <!-- ② 中栏 -->
     <main class="middle">
       <HeroSection />
+      <ArticleList />
     </main>
 
     <!-- ③ 右栏 -->
@@ -68,6 +69,7 @@
 import SideCard from '@/components/home/SideCard.vue'
 import TechWall from '@/components/home/TechWall.vue'
 import HeroSection from '@/components/home/HeroSection.vue'
+import ArticleList from '@/components/home/ArticleList.vue'
 
 // 先写死，以后接接口再换
 const stats = [
