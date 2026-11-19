@@ -25,7 +25,6 @@ coverage
 *.sw?
 .claude
 .screens
-.vscode
 
 *.tsbuildinfo
 
