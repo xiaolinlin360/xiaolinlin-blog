@@ -1,35 +1,27 @@
 name: 自动部署博客前台前端
-
 on:
   push:
     branches:
       - main
-
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
-
     steps:
       - name: 📦 读取仓库内容
         uses: actions/checkout@v4
-
       - name: 🟢 安装 pnpm 环境
         uses: pnpm/action-setup@v3
         with:
           version: 9
-
       - name: 🟢 安装 Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'pnpm'
-
       - name: 📦 安装依赖并打包
         run: |
           pnpm install --frozen-lockfile
           pnpm build
-          # 💡 注意：有些项目打包后的产物叫 dist，有些叫 build，请确认你本地打包后的文件夹名字
-
       - name: 🚀 将 dist 产物上传到服务器
         uses: appleboy/scp-action@v0.1.7
         with:
