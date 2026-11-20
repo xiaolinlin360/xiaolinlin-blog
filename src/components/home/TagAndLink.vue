@@ -95,7 +95,7 @@ interface LinkItem {
 const links: LinkItem[] = [
   { name: 'Github', href: 'https://github.com/xiaolinlin360', path: siGithub.path },
   // TODO: Blog 要跳另一个主页面，等那边做出来再把地址填上
-  { name: 'Blog', comp: Reading },
+  { name: 'Article', href: '/article', comp: Reading },
   { name: 'Cloud', comp: Cloudy },
   { name: 'Light', comp: Sunny },
   { name: 'Album', comp: Picture },

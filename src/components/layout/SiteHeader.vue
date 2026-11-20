@@ -1,7 +1,7 @@
 <template>
   <header class="site-header" :class="{ 'is-scrolled': scrolled }">
     <div class="header-inner">
-      <RouterLink to="/" class="brand">逸刻</RouterLink>
+      <RouterLink to="/blog" class="brand">逸刻</RouterLink>
 
       <!-- 图标导航：名字放 title 里，鼠标悬停显示 -->
       <nav class="nav">
@@ -43,7 +43,7 @@ import {
 import { isDark, toggleDark } from '@/composables/useTheme'
 
 const navItems = [
-  { name: '博客', path: '/', icon: HomeFilled },
+  { name: '博客', path: '/blog', icon: HomeFilled },
   { name: '文章', path: '/article', icon: Reading },
   { name: '图库', path: '/gallery', icon: Picture },
   { name: '随笔', path: '/notes', icon: Notebook },
