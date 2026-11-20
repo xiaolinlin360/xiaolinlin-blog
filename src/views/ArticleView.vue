@@ -1,6 +1,9 @@
 <template>
   <div class="blog-layout">
-    <ProfileCard class="side" />
+    <div class="side">
+      <ProfileCard />
+      <TagCard />
+    </div>
 
     <section class="main">
       <!-- 顶上一排分类：全部 + 大分类「文章」下面的子分类 -->
@@ -41,6 +44,7 @@
 import { ref, computed, onMounted } from 'vue'
 import ProfileCard from '@/components/article/ProfileCard.vue'
 import PostCard from '@/components/article/PostCard.vue'
+import TagCard from '@/components/article/TagCard.vue'
 import { getArticles, getTotalArticle, type ArticleItem } from '@/api/article'
 import { getCategories, getSubsets, type Subset } from '@/api/subset'
 
@@ -108,10 +112,16 @@ onMounted(async () => {
      否则左边的 sticky 卡片会被容器高度挤回去（跳 24px） */
   min-height: calc(100vh - 64px - 140px);
 
-  /* 左边个人卡跟着滚 */
+  /* 左边这一列：个人卡 + 标签卡，整体跟着滚 */
   .side {
     position: sticky;
     top: 88px;
+    /* 先把它按在 top:88 的位置上（顶栏 64 + 24），
+       这样 sticky 不需要“往下推 24px”，行高再矮也不会跳回来 */
+    margin-top: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
   }
 
   .main {
