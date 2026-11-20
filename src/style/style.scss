@@ -44,6 +44,12 @@ body,
   min-height: 100%;
 }
 
+/* 强制一直显示滚动条：内容长短一变（比如切换分类后文章变少），
+   就不会因为滚动条出现/消失把整页横向挤一下 */
+html {
+  overflow-y: scroll;
+}
+
 /* 切主题的那 0.35s 里，让所有颜色一起渐变，不然整页是「闪」一下；
    useTheme.ts 里的 toggleDark 会在 350ms 后把这个类摘掉 */
 html.theme-transition,

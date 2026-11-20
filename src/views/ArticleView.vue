@@ -104,6 +104,9 @@ onMounted(async () => {
   grid-template-columns: 260px minmax(0, 1fr);
   gap: 32px;
   align-items: start;
+  /* 右边文章少的时候别让整行跟着塌下来，
+     否则左边的 sticky 卡片会被容器高度挤回去（跳 24px） */
+  min-height: calc(100vh - 64px - 140px);
 
   /* 左边个人卡跟着滚 */
   .side {

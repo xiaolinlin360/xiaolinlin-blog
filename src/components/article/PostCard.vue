@@ -13,6 +13,8 @@
 
       <h3 class="title">{{ article.title }}</h3>
 
+      <p class="excerpt">{{ excerptOf(article) }}</p>
+
       <div class="foot">
         <div class="tags">
           <span v-for="label in article.labels" :key="label.id" class="tag">
@@ -28,7 +30,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import type { ArticleItem } from '@/api/article'
-import { coverOf, dateOf } from '@/utils/format'
+import { coverOf, dateOf, excerptOf } from '@/utils/format'
 
 const props = defineProps<{
   article: ArticleItem
@@ -108,12 +110,29 @@ const articleUrl = computed(() => ({ path: '/article', query: { id: props.articl
   }
 
   .title {
+    /* 钉死两行的高度（16px × 1.5 × 2）：
+       标题只有一行时也把位置占满，卡片才不会被内容撑成高矮不一 */
+    height: 48px;
     font-size: 16px;
     font-weight: 600;
     line-height: 1.5;
     color: $my-text-main;
 
     /* 最多两行，多的收掉 */
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    overflow: hidden;
+  }
+
+  /* 简介同样钉死两行 */
+  .excerpt {
+    height: 40px; /* 13px × 20px 行高 × 2 */
+    margin-top: 6px;
+    font-size: 13px;
+    line-height: 20px;
+    color: $my-text-sub;
     display: -webkit-box;
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 2;
@@ -131,7 +150,9 @@ const articleUrl = computed(() => ({ path: '/article', query: { id: props.articl
 
     .tags {
       display: flex;
-      flex-wrap: wrap;
+      /* 标签永远只占一行，多了裁掉，否则标签换行会把底部撑高 */
+      flex-wrap: nowrap;
+      overflow: hidden;
       gap: 4px 10px;
       min-width: 0;
 
