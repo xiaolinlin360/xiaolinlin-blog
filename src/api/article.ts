@@ -71,3 +71,7 @@ export const addView = (id: string) => http<{ views: number }>('POST', '/article
 export const praiseArticle = (id: string) =>
   http<{ praise_count: number }>('POST', '/article/praise', { id })
 
+/** 取消收藏 -1（点错了点回来） */
+export const offPraiseArticle = (id: string) =>
+  http<{ praise_count: number }>('POST', '/article/offPraise', { id })
+

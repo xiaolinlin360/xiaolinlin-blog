@@ -19,7 +19,11 @@
               <PriceTag /> {{ label.label_name }}
             </span>
             <span class="item"><View /> 浏览量 {{ article.views }}</span>
-            <button class="item btn" :class="{ active: isPraised }" @click="praise">
+            <button
+              class="item praise-btn"
+              :class="{ activePraise: isPraised }"
+              @click="togglePraise"
+            >
               <Star /> {{ isPraised ? '已收藏' : '收藏' }} {{ article.praise_count }}
             </button>
           </div>
@@ -65,7 +69,13 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { Calendar, Clock, Document, Download, PriceTag, Star, View } from '@element-plus/icons-vue'
-import { getArticleDetail, addView, praiseArticle, type ArticleDetail } from '@/api/article'
+import {
+  getArticleDetail,
+  addView,
+  praiseArticle,
+  offPraiseArticle,
+  type ArticleDetail,
+} from '@/api/article'
 import { getProfile } from '@/api/profile'
 import { API_BASE } from '@/utils/http'
 import { coverOf, dateOf } from '@/utils/format'
@@ -88,16 +98,27 @@ const readPraised = (): string[] => {
   }
 }
 
-const isPraised = ref(false) //是否收藏
-const praise = async () => {
-  if (isPraised.value) return
+const isPraised = ref(false) //是不是已经收藏过这篇
+
+/** 点一下收藏，再点一下取消（本地记 id，后端只管加减数字） */
+const togglePraise = async () => {
   try {
-    const { praise_count } = await praiseArticle(id)
-    article.value!.praise_count = praise_count
-    localStorage.setItem('praised-articles', JSON.stringify([...readPraised(), id]))
-    isPraised.value = true
+    if (isPraised.value) {
+      const { praise_count } = await offPraiseArticle(id)
+      article.value!.praise_count = praise_count
+      localStorage.setItem(
+        'praised-articles',
+        JSON.stringify(readPraised().filter((item) => item !== id)),
+      )
+      isPraised.value = false
+    } else {
+      const { praise_count } = await praiseArticle(id)
+      article.value!.praise_count = praise_count
+      localStorage.setItem('praised-articles', JSON.stringify([...readPraised(), id]))
+      isPraised.value = true
+    }
   } catch (error) {
-    console.error('收藏失败', error)
+    console.error('切换收藏失败', error)
   }
 }
 
@@ -249,6 +270,7 @@ onMounted(async () => {
       margin-top: 14px;
 
       .item {
+        background-color: #00000000;
         display: inline-flex;
         align-items: center;
         gap: 4px;
@@ -257,6 +279,13 @@ onMounted(async () => {
         border-radius: 6px;
         font-size: 12px;
         color: $my-text-sub;
+      }
+      .activePraise {
+        color: $my-accent-color;
+        border-color: $my-accent-color;
+      }
+      .praise-btn {
+        width: 85px;
       }
     }
 
