@@ -1,32 +1,293 @@
 <template>
-  <div class="article-detail">
-    <p class="hint">文章详情页还没做，先把路由和 id 占住</p>
-    <p class="id">id = {{ uuid }}</p>
+  <div v-if="article" class="article-detail">
+    <!-- 左边：正文 -->
+    <article class="article">
+      <!-- 上半截：左边字数/标题/标签，右边封面 -->
+      <div class="header">
+        <div class="head-main">
+          <img v-if="article.url" class="cover" :src="coverOf(article.url)" :alt="article.title" />
+          <div class="stats">
+            <span><Document /> {{ wordCount }} 字</span>
+            <span><Clock /> {{ readMinutes }} 分钟</span>
+          </div>
+
+          <h1 class="title">{{ article.title }}</h1>
+
+          <div class="meta">
+            <span class="item"><Calendar /> {{ dateOf(article.created_at) }}</span>
+            <span v-for="label in article.labels" :key="label.id" class="item">
+              <PriceTag /> {{ label.label_name }}
+            </span>
+            <span class="item"><View /> 浏览量 {{ article.views }}</span>
+            <span class="item"><Star /> 收藏 {{ article.praise_count }}</span>
+          </div>
+
+          <!-- 不是博主A 自己写的，就当投稿处理 -->
+          <template v-if="!isOwner">
+            <p class="notice">本文为朋友投稿。</p>
+            <p class="notice">投稿者：{{ article.username_name }}</p>
+          </template>
+          <!-- 简介：正文前面单独一块 -->
+          <p v-if="article.introduce" class="intro">{{ article.introduce }}</p>
+        </div>
+      </div>
+
+      <div class="content">{{ article.content }}</div>
+
+      <!-- 附件下载 -->
+      <div v-if="article.attachments.length" class="attachments">
+        <a
+          v-for="file in article.attachments"
+          :key="file.id"
+          class="download"
+          :href="API_BASE + file.url"
+          :download="file.file_name"
+        >
+          <Download />
+          {{ file.file_name }}
+        </a>
+      </div>
+    </article>
+
+    <!-- 右边：评论 -->
+    <aside class="comments">
+      <h2 class="comments-title">评论</h2>
+      <CommentBox />
+    </aside>
   </div>
+
+  <p v-else-if="failed" class="loading">文章不存在，或者还没发布</p>
+  <p v-else class="loading">加载中…</p>
 </template>
 
 <script setup lang="ts">
+import { ref, computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
+import { Calendar, Clock, Document, Download, PriceTag, Star, View } from '@element-plus/icons-vue'
+import { getArticleDetail, addView, type ArticleDetail } from '@/api/article'
+import { getProfile } from '@/api/profile'
+import { API_BASE } from '@/utils/http'
+import { coverOf, dateOf } from '@/utils/format'
+import CommentBox from '@/components/article/CommentBox.vue'
 
-// 地址栏 /article/<uuid> 里的那段
 const route = useRoute()
-const uuid = route.params.uuid
+const id = String(route.params.uuid ?? '')
+
+const article = ref<ArticleDetail | null>(null)
+const ownerId = ref('')
+const failed = ref(false)
+
+const wordCount = computed(() => article.value?.content.length ?? 0)
+/** 平均 200 字 1 分钟，向上取整，最少 1 分钟 */
+const readMinutes = computed(() => Math.max(1, Math.ceil(wordCount.value / 200)))
+/** 作者就是博主A（权限 0 那位）才不算投稿 */
+const isOwner = computed(() => !ownerId.value || article.value?.user_id === ownerId.value)
+
+onMounted(async () => {
+  try {
+    const [detail, profile] = await Promise.all([getArticleDetail(id), getProfile()])
+    article.value = detail
+    ownerId.value = profile.id
+
+    // 浏览量 +1，把最新数字盖回来
+    const fresh = await addView(id)
+    article.value.views = fresh.views
+  } catch (error) {
+    console.error('获取文章详情失败', error)
+    failed.value = true
+  }
+})
 </script>
 
 <style scoped lang="scss">
 .article-detail {
-  padding: 60px 0;
-  text-align: center;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 360px;
+  gap: 32px;
+  align-items: start;
 
-  .hint {
-    font-size: 14px;
-    color: $my-text-sub;
+  .article,
+  .comments {
+    padding: 24px;
+    border: 1px solid $my-border-color;
+    border-radius: 16px;
+    background-color: transparent;
   }
 
-  .id {
-    margin-top: 10px;
-    font-size: 12px;
+  /* ---------- 正文 ---------- */
+  .article {
+    min-width: 0;
+
+    /* 上半截：左边字数/标题/标签，右边封面 */
+    .header {
+      .head-main {
+        display: flow-root;
+      }
+
+      /* 封面钉在右上角，图比例随便，裁一裁 */
+      .cover {
+        float: right;
+        width: 480px;
+        max-height: 280px;
+        object-fit: cover;
+        border-radius: 10px;
+        border: 1px solid $my-border-color;
+        background-color: $my-bg-hover;
+        margin-left: 24px;
+        margin-bottom: 16px;
+      }
+      /* 简介：正文前面单独一块，左边一道主题色竖线 */
+      .intro {
+        margin-top: 20px;
+        padding: 10px 0 10px 14px;
+        border-left: 3px solid $my-accent-color;
+        font-size: 14px;
+        line-height: 1.9;
+        color: $my-text-sub;
+      }
+    }
+
+    /* 附件下载：正文最底下一排按钮 */
+    .attachments {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 28px;
+      padding-top: 18px;
+      border-top: 1px dashed $my-border-color;
+
+      .download {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 14px;
+        border: 1px solid $my-border-color;
+        border-radius: 8px;
+        font-size: 13px;
+        color: $my-text-sub;
+        transition:
+          color 0.15s,
+          border-color 0.15s;
+
+        &:hover {
+          color: $my-accent-color;
+          border-color: $my-accent-color;
+        }
+      }
+    }
+
+    /* 顶上那行：多少字 / 读几分钟 */
+    .stats {
+      display: flex;
+      gap: 16px;
+      font-size: 13px;
+      color: $my-text-light;
+
+      span {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+      }
+    }
+
+    /* 标题左边一根蓝色竖线 */
+    .title {
+      position: relative;
+      margin-top: 16px;
+      padding-left: 16px;
+      font-size: 28px;
+      font-weight: 700;
+      line-height: 1.4;
+      color: $my-text-main;
+
+      &::before {
+        content: '';
+        position: absolute;
+        top: 8px;
+        bottom: 8px;
+        left: 0;
+        width: 4px;
+        border-radius: 2px;
+        background-color: $my-accent-color;
+      }
+    }
+
+    /* 日期 / 标签 / 浏览量 / 收藏，一排小方块 */
+    .meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 14px;
+
+      .item {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        padding: 3px 10px;
+        border: 1px solid $my-border-color;
+        border-radius: 6px;
+        font-size: 12px;
+        color: $my-text-sub;
+      }
+    }
+
+    /* 投稿说明：左边一道短线 */
+    .notice {
+      margin-top: 18px;
+      padding: 2px 0 2px 14px;
+      border-left: 3px solid $my-border-color;
+      font-size: 14px;
+      color: $my-text-sub;
+    }
+
+    .content {
+      margin-top: 22px;
+      font-size: 15px;
+      line-height: 2;
+      color: $my-text-main;
+      /* 正文里的换行原样保留 */
+      white-space: pre-wrap;
+    }
+  }
+
+  /* ---------- 评论 ---------- */
+  .comments {
+    .comments-title {
+      margin-bottom: 16px;
+      font-size: 15px;
+      font-weight: 600;
+      color: $my-text-main;
+    }
+  }
+
+  .loading {
+    padding: 60px 0;
+    text-align: center;
+    font-size: 13px;
     color: $my-text-light;
+  }
+
+  /* Element Plus 图标只带 viewBox，得自己给尺寸 */
+  :deep(svg) {
+    width: 1em;
+    height: 1em;
+  }
+
+  /* 窄了就把评论放到下面 */
+  @media (max-width: 1100px) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  /* 再窄一点，封面也从右边挪到标题上面 */
+  @media (max-width: 720px) {
+    .article .header {
+      flex-direction: column;
+
+      .cover {
+        width: 100%;
+        height: 200px;
+      }
+    }
   }
 }
 </style>

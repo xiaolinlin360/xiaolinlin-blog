@@ -39,3 +39,31 @@ export const getArticles = (pageSize = 10, pageNum = 1, top?: string) =>
 export const getTotalArticle = (top?: string) =>
   http<{ total: number }>('POST', '/article/getTotalArticle', { top: top || null })
 
+/** 文章附件（详情里带回来的） */
+export interface Attachment {
+  id: string
+  file_name: string
+  /** /data/xxx/yyy 这种相对路径，用的时候拼后端地址 */
+  url: string
+  size: string
+  type: string
+}
+
+/** 详情比列表多这几个字段 */
+export interface ArticleDetail extends ArticleItem {
+  /** 作者 id，用来判断是不是博主A 自己写的 */
+  user_id: string
+  /** 浏览量 */
+  views: number
+  /** 点赞（收藏）数 */
+  praise_count: number
+  attachments: Attachment[]
+}
+
+/** 文章详情：匿名只能看已发布的，草稿会 404 */
+export const getArticleDetail = (id: string) =>
+  http<ArticleDetail>('POST', '/article/getArticleDetail', { id })
+
+/** 打开详情页时调一次，返回最新的浏览量 */
+export const addView = (id: string) => http<{ views: number }>('POST', '/article/addView', { id })
+
