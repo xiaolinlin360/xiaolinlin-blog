@@ -41,33 +41,36 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import ProfileCard from '@/components/article/ProfileCard.vue'
 import PostCard from '@/components/article/PostCard.vue'
 import TagCard from '@/components/article/TagCard.vue'
 import { getArticles, getTotalArticle, type ArticleItem } from '@/api/article'
 import { getCategories, getSubsets, type Subset } from '@/api/subset'
 
-const subsets = ref<Subset[]>([])
-const activeId = ref('') // '' = 全部文章
-const list = ref<ArticleItem[]>([])
-const total = ref(0)
-const loading = ref(false)
+const route = useRoute()
+const router = useRouter()
 
-/** 「全部文章」是写死的第一项，后面接接口拿到的子分类 */
+const subsets = ref<Subset[]>([]) //分组列表
+const list = ref<ArticleItem[]>([]) //文章列表
+const total = ref(0) //总文章数
+const loading = ref(false) //是否正在加载
 const tabs = computed(() => [
   { id: '', name: '全部文章' },
   ...subsets.value.map((item) => ({ id: item.id, name: item.name })),
-])
-
+]) //顶部分组列表
+const activeId = computed(() => String(route.query.top ?? '')) //监听地址栏的 ?top= 变化，拿到当前选的分类 id
+const select = (id: string) => router.replace({ path: '/article', query: id ? { top: id } : {} }) //点击分类只改地址栏，列表交给下面的 watch 重新拉
 const heading = computed(
   () => tabs.value.find((tab) => tab.id === activeId.value)?.name ?? '全部文章',
-)
+) //动态拿到当前选中的小标题，点击分类时候触发
 
 /** 子分类 id -> 名字，卡片上的分类角标要用 */
 const nameOf = (item: ArticleItem) =>
   subsets.value.find((subset) => subset.id === item.subset_id)?.name ?? ''
 
+/** 加载文章列表 */
 const load = async () => {
   loading.value = true
   try {
@@ -84,14 +87,12 @@ const load = async () => {
   }
 }
 
-const select = (id: string) => {
-  activeId.value = id
-  load()
-}
+// 地址栏的 ?top= 一变就重新拉列表（点分类、浏览器前进后退都走这条）
+watch(activeId, load)
 
 onMounted(async () => {
+  // 先找到 path 是 /blog 的那个大分类，再拿它下面的子分类，然后用load()加载文章列表
   try {
-    // 先找到 path 是 /blog 的那个大分类，再拿它下面的子分类
     const categories = await getCategories()
     const blog = categories.find((item) => item.path === '/blog')
     if (blog) subsets.value = await getSubsets(blog.id)

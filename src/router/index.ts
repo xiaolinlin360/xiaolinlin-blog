@@ -17,10 +17,18 @@ const routes = [
     meta: { title: '博客' },
   },
   {
-    path: '/article/:id?',
+    // 列表页：/article，分类筛选走 ?top=xxx
+    path: '/article',
     name: 'article',
     component: () => import('@/views/ArticleView.vue'),
     meta: { title: '文章' },
+  },
+  {
+    // 详情页：/article/<uuid>，跟列表用 query 区分开，不会打架
+    path: '/article/:uuid',
+    name: 'article-detail',
+    component: () => import('@/views/ArticleDetailView.vue'),
+    meta: { title: '文章详情' },
   },
   {
     path: '/gallery',

@@ -27,15 +27,15 @@ export interface ArticlePage {
   pageNum: number
 }
 
-/** 文章列表：不用登录，后端只会给已发布的（登录了才看得到草稿） */
-export const getArticles = (pageSize = 10, pageNum = 1, subsetId?: string) =>
+/** 文章列表：不用登录，后端只会给已发布的（登录了才看得到草稿）。top = 顶部分类 */
+export const getArticles = (pageSize = 10, pageNum = 1, top?: string) =>
   http<ArticlePage>('POST', '/article/getArticle', {
     pageSize,
     pageNum,
-    subset_id: subsetId || null,
+    top: top || null,
   })
 
-/** 文章总数：传子分类就只数那个分类的 */
-export const getTotalArticle = (subsetId?: string) =>
-  http<{ total: number }>('POST', '/article/getTotalArticle', { subset_id: subsetId || null })
+/** 文章总数：传 top 就只数那个分类的 */
+export const getTotalArticle = (top?: string) =>
+  http<{ total: number }>('POST', '/article/getTotalArticle', { top: top || null })
 

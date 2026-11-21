@@ -40,8 +40,8 @@ const props = defineProps<{
   latest?: boolean
 }>()
 
-/** 带参路由，跟首页列表保持一致 */
-const articleUrl = computed(() => ({ path: '/article', query: { id: props.article.id } }))
+/** 详情用动态路由：/article/<id>，列表的筛选走 ?top=，两者不会打架 */
+const articleUrl = computed(() => `/article/${props.article.id}`)
 </script>
 
 <style scoped lang="scss">

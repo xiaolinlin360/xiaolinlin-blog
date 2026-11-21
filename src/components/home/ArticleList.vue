@@ -46,8 +46,8 @@ onMounted(async () => {
   }
 })
 
-/** 带参路由：/article?id=xxx，详情页那边用 route.query.id 取 */
-const articleUrl = (id: string) => ({ path: '/article', query: { id } })
+/** 详情用动态路由：/article/<id> */
+const articleUrl = (id: string) => `/article/${id}`
 
 /** 封面可能是 /data/xxx 相对路径，也可能直接是外链 */
 const coverOf = (url: string) => (url.startsWith('http') ? url : API_BASE + url)
