@@ -1,7 +1,7 @@
 <!-- 后面可能废弃这个文件 -->
 
 <template>
-  <div class="page-placeholder">
+  <!-- <div class="page-placeholder">
     <p class="path">{{ route.path }}</p>
     <p class="tip">「{{ route.name }}」页面还没做，先用它占位</p>
   </div>
@@ -37,4 +37,5 @@ const route = useRoute()
     color: $my-text-light;
   }
 }
-</style>
+</style> -->
+</template>

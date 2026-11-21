@@ -21,7 +21,9 @@
 
     <!-- 第二行：链接。还没想好去处的给个 # 占位，乱跳也没事 -->
     <div class="links">
-      <a
+      <component
+        v-bind="linkAttrs(link.href)"
+        :is="linkTag(link.href)"
         v-for="link in links"
         :key="link.name"
         class="link"
@@ -36,7 +38,7 @@
         </svg>
         <component :is="link.comp" v-else />
         <span>{{ link.name }}</span>
-      </a>
+      </component>
     </div>
   </div>
 </template>
@@ -110,6 +112,15 @@ const handleClick = (event: MouseEvent, link: LinkItem) => {
   event.preventDefault()
   link.onClick()
 }
+
+const linkTag = (href?: string) => (href?.startsWith('http') ? 'a' : href ? 'router-link' : 'div')
+
+const linkAttrs = (href?: string) =>
+  href?.startsWith('http')
+    ? { href, target: '_blank', rel: 'noopener noreferrer' }
+    : href
+      ? { to: href }
+      : {}
 </script>
 
 <style scoped lang="scss">
