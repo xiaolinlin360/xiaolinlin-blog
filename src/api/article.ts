@@ -67,3 +67,7 @@ export const getArticleDetail = (id: string) =>
 /** 打开详情页时调一次，返回最新的浏览量 */
 export const addView = (id: string) => http<{ views: number }>('POST', '/article/addView', { id })
 
+/** 收藏 +1，返回最新的收藏数（防重复是前端用 localStorage 做的） */
+export const praiseArticle = (id: string) =>
+  http<{ praise_count: number }>('POST', '/article/praise', { id })
+

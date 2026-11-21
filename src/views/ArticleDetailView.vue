@@ -19,7 +19,9 @@
               <PriceTag /> {{ label.label_name }}
             </span>
             <span class="item"><View /> 浏览量 {{ article.views }}</span>
-            <span class="item"><Star /> 收藏 {{ article.praise_count }}</span>
+            <button class="item btn" :class="{ active: isPraised }" @click="praise">
+              <Star /> {{ isPraised ? '已收藏' : '收藏' }} {{ article.praise_count }}
+            </button>
           </div>
 
           <!-- 不是博主A 自己写的，就当投稿处理 -->
@@ -63,18 +65,41 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { Calendar, Clock, Document, Download, PriceTag, Star, View } from '@element-plus/icons-vue'
-import { getArticleDetail, addView, type ArticleDetail } from '@/api/article'
+import { getArticleDetail, addView, praiseArticle, type ArticleDetail } from '@/api/article'
 import { getProfile } from '@/api/profile'
 import { API_BASE } from '@/utils/http'
 import { coverOf, dateOf } from '@/utils/format'
 import CommentBox from '@/components/article/CommentBox.vue'
 
 const route = useRoute()
-const id = String(route.params.uuid ?? '')
+const id = String(route.params.uuid ?? '') //直接通过路由拿到id
 
 const article = ref<ArticleDetail | null>(null)
 const ownerId = ref('')
 const failed = ref(false)
+
+/* ---------- 收藏：后端只 +1，防重复靠本地记了哪些 id ---------- */
+
+const readPraised = (): string[] => {
+  try {
+    return JSON.parse(localStorage.getItem('praised-articles') ?? '[]')
+  } catch {
+    return []
+  }
+}
+
+const isPraised = ref(false) //是否收藏
+const praise = async () => {
+  if (isPraised.value) return
+  try {
+    const { praise_count } = await praiseArticle(id)
+    article.value!.praise_count = praise_count
+    localStorage.setItem('praised-articles', JSON.stringify([...readPraised(), id]))
+    isPraised.value = true
+  } catch (error) {
+    console.error('收藏失败', error)
+  }
+}
 
 const wordCount = computed(() => article.value?.content.length ?? 0)
 /** 平均 200 字 1 分钟，向上取整，最少 1 分钟 */
@@ -87,6 +112,9 @@ onMounted(async () => {
     const [detail, profile] = await Promise.all([getArticleDetail(id), getProfile()])
     article.value = detail
     ownerId.value = profile.id
+
+    // 这篇以前收藏过没有（本地记的）
+    isPraised.value = readPraised().includes(id)
 
     // 浏览量 +1，把最新数字盖回来
     const fresh = await addView(id)
