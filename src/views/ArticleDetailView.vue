@@ -51,8 +51,7 @@
 
     <!-- 右边：评论 -->
     <aside class="comments">
-      <h2 class="comments-title">评论</h2>
-      <CommentBox />
+      <CommentBox :article-id="article.id" />
     </aside>
   </div>
 
@@ -113,7 +112,9 @@ onMounted(async () => {
     border-radius: 16px;
     background-color: transparent;
   }
-
+  .comments {
+    padding: 14px;
+  }
   /* ---------- 正文 ---------- */
   .article {
     min-width: 0;
@@ -251,15 +252,6 @@ onMounted(async () => {
   }
 
   /* ---------- 评论 ---------- */
-  .comments {
-    .comments-title {
-      margin-bottom: 16px;
-      font-size: 15px;
-      font-weight: 600;
-      color: $my-text-main;
-    }
-  }
-
   .loading {
     padding: 60px 0;
     text-align: center;
