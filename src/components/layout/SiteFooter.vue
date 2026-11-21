@@ -1,7 +1,7 @@
 <template>
   <footer class="site-footer">
     <div class="footer-inner">
-      <div>© {{ year }} 逸刻 · 春祺夏安，秋绥冬禧</div>
+      <div>© {{ year }} xiaolinlin · にほんごがわからないと、このぶんはよめないよ。</div>
       <div>粤ICP备2026170399号</div>
     </div>
   </footer>

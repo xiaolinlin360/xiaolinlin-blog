@@ -1,7 +1,7 @@
 <template>
   <header class="site-header" :class="{ 'is-scrolled': scrolled }">
     <div class="header-inner">
-      <RouterLink to="/blog" class="brand">逸刻</RouterLink>
+      <RouterLink to="/blog" class="brand">xiaolinlin</RouterLink>
 
       <!-- 图标导航：名字放 title 里，鼠标悬停显示 -->
       <nav class="nav">

@@ -20,12 +20,16 @@
             </li>
           </ul>
           <!-- 用原生 details，不需要写折叠逻辑 -->
-          <details class="build-info">
-            <summary>展开构建信息</summary>
-            <div class="build-grid">
-              <div v-for="item in builds" :key="item.name" class="build">
-                <span class="name">{{ item.name }}</span>
-                <span class="version">{{ item.version }}</span>
+          <details class="build-info" open>
+            <summary @click.prevent="buildOpen = !buildOpen" :class="{ 'is-open': buildOpen }">
+              展开构建信息
+            </summary>
+            <div class="build-collapse" :class="{ 'is-open': buildOpen }">
+              <div class="build-grid">
+                <div v-for="item in builds" :key="item.name" class="build">
+                  <span class="name">{{ item.name }}</span>
+                  <span class="version">{{ item.version }}</span>
+                </div>
               </div>
             </div>
           </details>
@@ -66,11 +70,12 @@
 </template>
 
 <script setup lang="ts">
+import { ref } from 'vue'
 import SideCard from '@/components/home/SideCard.vue'
 import TechWall from '@/components/home/TechWall.vue'
 import HeroSection from '@/components/home/HeroSection.vue'
 import ArticleList from '@/components/home/ArticleList.vue'
-
+const buildOpen = ref(false)
 // 先写死，以后接接口再换
 const stats = [
   { label: '运营时长', value: '2年2个月' },
@@ -82,7 +87,7 @@ const infos = [
   { label: '图片存储', value: '自建 /data 目录' },
   { label: '软件协议', value: 'MIT' },
   { label: '文章许可', value: 'CC BY-NC-SA 4.0' },
-  { label: '规范域名', value: '待填写' },
+  { label: '规范域名', value: 'xiaolinlin.xyz' },
 ]
 
 // 这里放你自己的栈，不是他的（他的是 Nuxt / Content）
@@ -96,8 +101,8 @@ const builds = [
 ]
 
 const quote = {
-  text: '竹杖芒鞋轻胜马，谁怕？一蓑烟雨任平生。',
-  from: '苏轼《定风波》',
+  text: '岂不闻？天无绝人之路，只要我想走，路就在脚下！',
+  from: '大爱仙尊《蛊真人》',
 }
 
 const welcome = '欢迎来自地球的朋友 🌏'
@@ -186,9 +191,13 @@ const welcome = '欢迎来自地球的朋友 🌏'
     cursor: pointer;
     list-style: none;
 
-    /* 去掉默认三角，用 css 画一个小箭头 */
     &::before {
       content: '▾ ';
+      display: inline-block;
+      transition: transform 0.3s ease;
+    }
+    &.is-open::before {
+      transform: rotate(180deg);
     }
 
     &::-webkit-details-marker {
@@ -196,7 +205,16 @@ const welcome = '欢迎来自地球的朋友 🌏'
     }
   }
 }
+/* ▼▼▼ 新增：折叠包裹层的过渡 ▼▼▼ */
+.build-collapse {
+  max-height: 0;
+  overflow: hidden; // 文字溢出隐藏，正是你要的
+  transition: max-height 0.4s linear;
 
+  &.is-open {
+    max-height: 200px; // 略大于内容实际高度即可
+  }
+}
 .build-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
