@@ -2,12 +2,14 @@
   <div class="album">
     <ul class="photos">
       <li v-for="item in list" :key="item.id" class="photo-item">
-        <!-- 相框里的照片 -->
-        <span class="frame">
-          <img v-if="item.gallery_urls[0]" :src="coverOf(item.gallery_urls[0])" :alt="item.title" />
-          <span v-else class="no-photo">暂无</span>
-        </span>
-        <p class="caption">{{ item.title }} [{{ item.photo_count }}]</p>
+        <RouterLink :to="`/gallery/${item.id}`" class="link">
+          <!-- 相框里的照片 -->
+          <span class="frame">
+            <img v-if="item.gallery_urls[0]" :src="coverOf(item.gallery_urls[0])" :alt="item.title" />
+            <span v-else class="no-photo">暂无</span>
+          </span>
+          <p class="caption">{{ item.title }} [{{ item.photo_count }}]</p>
+        </RouterLink>
       </li>
     </ul>
 
@@ -97,6 +99,13 @@ onMounted(async () => {
         0 2px 4px #4a44581a,
         0 18px 34px #4a445833;
       z-index: 2;
+    }
+
+    /* 整张纸都能点，点进相册内页 */
+    > .link {
+      display: block;
+      color: inherit;
+      text-decoration: none;
     }
 
     /* ---------- 相框里的照片 ---------- */

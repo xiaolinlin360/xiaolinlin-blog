@@ -37,6 +37,13 @@ const routes = [
     meta: { title: '图库' },
   },
   {
+    // 相册内页：/gallery/<相册id>
+    path: '/gallery/:id',
+    name: 'gallery-detail',
+    component: () => import('@/views/GalleryDetailView.vue'),
+    meta: { title: '相册' },
+  },
+  {
     path: '/notes',
     name: 'notes',
     component: () => import('@/views/PagePlaceholder.vue'),

@@ -22,7 +22,7 @@ const year = new Date().getFullYear()
 .site-footer {
   margin-top: 64px;
   border-top: 1px solid $my-border-color;
-  padding: 24px;
+  padding: 0 24px 24px 24px;
   transition:
     border-color 0.3s,
     color 0.3s;
