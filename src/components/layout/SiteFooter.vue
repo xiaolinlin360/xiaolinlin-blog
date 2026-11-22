@@ -1,5 +1,6 @@
 <template>
   <footer class="site-footer">
+    <img src="../../../public/bottom.png" class="footer-bottom" alt="footer-bottom" />
     <div class="footer-inner">
       <div>© {{ year }} xiaolinlin · にほんごがわからないと、このぶんはよめないよ。</div>
       <div>粤ICP备2026170399号</div>
@@ -12,6 +13,12 @@ const year = new Date().getFullYear()
 </script>
 
 <style scoped lang="scss">
+.footer-bottom {
+  display: block;
+  max-width: 900px;
+  object-fit: cover;
+  margin: 0 auto;
+}
 .site-footer {
   margin-top: 64px;
   border-top: 1px solid $my-border-color;
