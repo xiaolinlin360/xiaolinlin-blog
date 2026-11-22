@@ -33,7 +33,7 @@ const routes = [
   {
     path: '/gallery',
     name: 'gallery',
-    component: () => import('@/views/PagePlaceholder.vue'),
+    component: () => import('@/views/GalleryView.vue'),
     meta: { title: '图库' },
   },
   {
