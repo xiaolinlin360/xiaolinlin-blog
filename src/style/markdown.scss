@@ -1,0 +1,144 @@
+// markdown 正文排版：文章详情和随笔详情共用这一套
+// 用法：<div class="markdown" v-html="html" />
+
+@use './variables.scss' as *;
+
+.markdown {
+  font-size: 15px;
+  line-height: 2;
+  color: $my-text-main;
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    /* 点目录跳过来时别被顶栏挡住 */
+    scroll-margin-top: 90px;
+    margin: 30px 0 14px;
+    font-weight: 600;
+    line-height: 1.5;
+
+    /* 标题前面那个 # 号，跟 Markdown 里一样 */
+    &::before {
+      content: '#';
+      margin-right: 8px;
+      font-weight: 400;
+      color: $my-accent-color;
+      opacity: 0.65;
+    }
+  }
+
+  h1 {
+    font-size: 24px;
+  }
+
+  h2 {
+    font-size: 20px;
+  }
+
+  h3 {
+    font-size: 17px;
+  }
+
+  h4 {
+    font-size: 15px;
+  }
+
+  p {
+    margin: 12px 0;
+  }
+
+  a {
+    color: $my-accent-color;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  ul,
+  ol {
+    margin: 12px 0;
+    padding-left: 22px;
+  }
+
+  li {
+    margin: 6px 0;
+  }
+
+  blockquote {
+    margin: 16px 0;
+    padding: 6px 0 6px 14px;
+    border-left: 3px solid $my-accent-color;
+    color: $my-text-sub;
+  }
+
+  /* 行内代码 */
+  code {
+    padding: 2px 6px;
+    border-radius: 5px;
+    font-family: Consolas, Menlo, monospace;
+    font-size: 13px;
+    background-color: $my-bg-hover;
+  }
+
+  /* 代码块：右上角挂个语言名，配色在 style/highlight.scss 里 */
+  pre {
+    position: relative;
+    margin: 16px 0;
+    padding: 26px 16px 14px;
+    overflow-x: auto;
+    border: 1px solid $my-border-color;
+    border-radius: 10px;
+    background-color: color-mix(in srgb, var(--my-bg-hover) 70%, transparent);
+
+    /* 语言名从 data-lang 里取，空就不显示 */
+    &[data-lang]:not([data-lang=''])::before {
+      content: attr(data-lang);
+      position: absolute;
+      top: 6px;
+      right: 14px;
+      font-size: 11px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: $my-text-light;
+    }
+
+    code {
+      padding: 0;
+      background: none;
+      font-size: 13px;
+      line-height: 1.7;
+    }
+  }
+
+  /* 表格 */
+  table {
+    width: 100%;
+    margin: 16px 0;
+    border-collapse: collapse;
+    font-size: 14px;
+
+    th,
+    td {
+      padding: 8px 12px;
+      border: 1px solid $my-border-color;
+      text-align: left;
+    }
+
+    th {
+      font-weight: 600;
+      background-color: $my-bg-hover;
+    }
+  }
+
+  img {
+    max-width: 100%;
+    margin: 12px 0;
+    border-radius: 10px;
+  }
+
+  hr {
+    margin: 26px 0;
+    border: none;
+    border-top: 1px dashed $my-border-color;
+  }
+}

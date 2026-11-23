@@ -46,7 +46,14 @@ const routes = [
   {
     path: '/notes',
     name: 'notes',
-    component: () => import('@/views/PagePlaceholder.vue'),
+    component: () => import('@/views/NotesView.vue'),
+    meta: { title: '随笔' },
+  },
+  {
+    // 随笔详情：/notes/<随笔id>，正文是 markdown
+    path: '/notes/:id',
+    name: 'note-detail',
+    component: () => import('@/views/NoteDetailView.vue'),
     meta: { title: '随笔' },
   },
   {
@@ -67,8 +74,12 @@ const routes = [
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes,
-  // 切页回到顶部
-  scrollBehavior: () => ({ top: 0 }),
+  scrollBehavior: (to, from, savedPosition) => {
+    // 带 #锚点 的跳转（比如点随笔目录）滚到那个标题，别回顶
+    if (to.hash) return { el: to.hash, top: 88 }
+    // 其它情况切页回顶部
+    return savedPosition ?? { top: 0 }
+  },
 })
 
 export default router

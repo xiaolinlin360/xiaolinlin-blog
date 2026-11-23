@@ -2,6 +2,8 @@
 // 全局入口：重置 + 主题变量落地 + 网格背景
 
 @use './variables.scss' as *;
+@use './highlight.scss';
+@use './markdown.scss';
 
 /* 全局重置 */
 * {

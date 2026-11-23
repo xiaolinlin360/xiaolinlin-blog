@@ -1,0 +1,68 @@
+// 代码高亮主题：亮色一套、暗色一套，用 CSS 变量切换
+// 类名是 highlight.js 输出的 .hljs-xxx，全局生效，只在 .markdown 里出现
+
+:root {
+  --code-keyword: #a626a4;
+  --code-string: #50a14f;
+  --code-number: #986801;
+  --code-comment: #a0a1a7;
+  --code-function: #4078f2;
+  --code-variable: #e45649;
+  --code-type: #c18401;
+}
+
+html.dark {
+  --code-keyword: #c678dd;
+  --code-string: #98c379;
+  --code-number: #d19a66;
+  --code-comment: #7f848e;
+  --code-function: #61afef;
+  --code-variable: #e06c75;
+  --code-type: #e5c07b;
+}
+
+.hljs-keyword,
+.hljs-selector-tag,
+.hljs-literal,
+.hljs-built_in {
+  color: var(--code-keyword);
+}
+
+.hljs-string,
+.hljs-attr,
+.hljs-regexp,
+.hljs-addition {
+  color: var(--code-string);
+}
+
+.hljs-number,
+.hljs-symbol,
+.hljs-bullet {
+  color: var(--code-number);
+}
+
+.hljs-comment,
+.hljs-quote,
+.hljs-meta {
+  color: var(--code-comment);
+  font-style: italic;
+}
+
+.hljs-title,
+.hljs-section,
+.hljs-name,
+.hljs-function .hljs-title {
+  color: var(--code-function);
+}
+
+.hljs-variable,
+.hljs-template-variable,
+.hljs-deletion {
+  color: var(--code-variable);
+}
+
+.hljs-type,
+.hljs-class .hljs-title,
+.hljs-attribute {
+  color: var(--code-type);
+}
