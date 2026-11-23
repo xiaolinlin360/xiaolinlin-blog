@@ -15,7 +15,7 @@ const year = new Date().getFullYear()
 <style scoped lang="scss">
 .footer-bottom {
   display: block;
-  max-width: 900px;
+  max-width: 80%;
   object-fit: cover;
   margin: 0 auto;
 }
