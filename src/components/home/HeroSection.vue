@@ -59,7 +59,7 @@ const streakUrl = computed(
 //贪吃蛇图，深色用 -dark
 const snakeUrl = computed(
   () =>
-    `https://raw.githubusercontent.com/lxfriday/lxfriday/output/github-contribution-grid-snake${isDark.value ? '-dark' : ''}.svg`,
+    `https://raw.githubusercontent.com/xiaolinlin360/xiaolinlin360/output/github-contribution-grid-snake${isDark.value ? '-dark' : ''}.svg`,
 )
 </script>
 
