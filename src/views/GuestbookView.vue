@@ -8,6 +8,9 @@
     <div class="layout">
       <!-- 左边：写留言 -->
       <aside class="form-card">
+        <!-- 右上角那颗小闪光 -->
+        <span class="sparkle" aria-hidden="true">✦</span>
+
         <h2 class="form-title">
           <ChatLineSquare />
           写一张小纸条
@@ -27,10 +30,54 @@
         <label class="field">
           <span class="field-label">想说的话</span>
           <textarea
+            ref="textareaRef"
             v-model="content"
             class="input textarea"
             maxlength="500"
             placeholder="写点什么吧…" />
+        </label>
+
+        <!-- 颜文字：最近用过的 + 精选，点一下插到光标处 -->
+        <div class="kaomoji">
+          <p class="kaomoji-head" @click="kaomojiOpen = !kaomojiOpen">
+            颜文字
+            <span class="sign">{{ kaomojiOpen ? '－' : '＋' }}</span>
+          </p>
+
+          <!-- 外层负责 0fr → 1fr 的高度过渡，内层 overflow: hidden 把内容裁住 -->
+          <div class="kaomoji-body" :class="{ open: kaomojiOpen }">
+            <div>
+              <template v-if="recent.length">
+                <p class="group-title">最近使用</p>
+                <div class="chips">
+                  <span
+                    v-for="item in recent"
+                    :key="item"
+                    class="chip"
+                    @click="insertKaomoji(item)">
+                    {{ item }}
+                  </span>
+                </div>
+              </template>
+
+              <p class="group-title">精选</p>
+              <div class="chips">
+                <span v-for="item in curated" :key="item" class="chip" @click="insertKaomoji(item)">
+                  {{ item }}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <label class="field">
+          <span class="field-label">邮箱 · 可选，不公开</span>
+          <input
+            v-model="email"
+            class="input"
+            type="email"
+            maxlength="100"
+            placeholder="填了我也许会给你回信" />
         </label>
 
         <p v-if="error" class="error">{{ error }}</p>
@@ -70,7 +117,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, nextTick } from 'vue'
 import { ChatLineSquare, Promotion } from '@element-plus/icons-vue'
 import { getGuestbooks, getTotalGuestbook, insertGuestbook } from '@/api/guestbook'
 import { dateOf } from '@/utils/format'
@@ -94,6 +141,62 @@ const content = ref('')
 const sending = ref(false)
 const error = ref('')
 const notice = ref('')
+
+/* ---------- 颜文字 ---------- */
+
+const RECENT_KEY = 'kaomoji-recent'
+/** 精选：手写常用的这些，够用了 */
+const curated = [
+  '(｡･ω･｡)ﾉ♡',
+  '(つ≧▽≦)つ',
+  '(๑•̀ㅂ•́)و✧',
+  '(´･ω･`)',
+  '(￣▽￣)ノ',
+  '(｡•́︿•̀｡)',
+  '(≧▽≦)',
+  '(。•ω•。)ノ♡',
+  '( ﾟ▽ﾟ)/',
+  '(⁄ ⁄•⁄ω⁄•⁄ ⁄)',
+  '(*/ω＼*)',
+  '(｡ì _ í｡)',
+  '(・∀・)',
+  '(๑>ᴗ<๑)',
+  '(*≧ω≦)',
+  '(｀・ω・´)',
+]
+
+const kaomojiOpen = ref(false)
+const textareaRef = ref<HTMLTextAreaElement>()
+/** 邮箱可选，不公开 */
+const email = ref('')
+
+/** 最近用过的，存在本地（最多 8 个，新的在最前） */
+const readRecent = (): string[] => {
+  try {
+    return JSON.parse(localStorage.getItem(RECENT_KEY) ?? '[]')
+  } catch {
+    return []
+  }
+}
+const recent = ref<string[]>(readRecent())
+
+/** 插到光标所在位置，插完光标停在颜文字后面 */
+const insertKaomoji = (text: string) => {
+  const el = textareaRef.value
+  const start = el?.selectionStart ?? content.value.length
+  const end = el?.selectionEnd ?? start
+
+  content.value = content.value.slice(0, start) + text + content.value.slice(end)
+
+  nextTick(() => {
+    el?.focus()
+    el?.setSelectionRange(start + text.length, start + text.length)
+  })
+
+  // 记进最近使用，去重后放最前，只留 8 个
+  recent.value = [text, ...recent.value.filter((item) => item !== text)].slice(0, 8)
+  localStorage.setItem(RECENT_KEY, JSON.stringify(recent.value))
+}
 
 const load = async (page = 1) => {
   loading.value = true
@@ -120,7 +223,7 @@ const submit = async () => {
 
   sending.value = true
   try {
-    await insertGuestbook(nickname.value.trim(), content.value.trim())
+    await insertGuestbook(nickname.value.trim(), content.value.trim(), email.value.trim())
     content.value = ''
     notice.value = '留言成功，谢谢你的小纸条 🎉'
     await load(1)
@@ -168,11 +271,24 @@ onMounted(() => load(1))
 
   /* ---------- 左边表单 ---------- */
   .form-card {
+    /* sticky 本身就是一个定位元素，右上角的 ✦ 可以相对它绝对定位 */
     position: sticky;
     top: 88px;
     padding: 22px 24px 20px;
     border: 1px solid $my-border-color;
     border-radius: 16px;
+
+    /* 右上角那颗 ✦，轻轻一闪一闪 */
+    .sparkle {
+      position: absolute;
+      top: 14px;
+      right: 16px;
+      font-size: 14px;
+      line-height: 1;
+      color: $my-accent-color;
+      pointer-events: none;
+      animation: twinkle 2.6s ease-in-out infinite;
+    }
 
     .form-title {
       display: flex;
@@ -234,6 +350,71 @@ onMounted(() => load(1))
       margin-top: 14px;
       font-size: 12px;
       color: #e45649;
+    }
+
+    /* ---------- 颜文字 ---------- */
+    .kaomoji {
+      margin-top: 16px;
+
+      .kaomoji-head {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 13px;
+        color: $my-text-sub;
+        cursor: pointer;
+        user-select: none;
+
+        .sign {
+          color: $my-text-light;
+        }
+
+        &:hover {
+          color: $my-text-main;
+        }
+      }
+
+      /* 高度过渡：外层 0fr → 1fr，内层 overflow: hidden 把内容裁住，
+         这样展开是“长出来”，不是“啪一下跳出来” */
+      .kaomoji-body {
+        display: grid;
+        grid-template-rows: 0fr;
+        transition: grid-template-rows 0.28s ease;
+
+        > div {
+          overflow: hidden;
+        }
+
+        &.open {
+          grid-template-rows: 1fr;
+        }
+      }
+
+      .group-title {
+        margin-top: 14px;
+        font-size: 12px;
+        color: $my-text-light;
+      }
+
+      /* 纯文字，不带底，跟他的排版一样 */
+      .chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px 12px;
+        margin-top: 8px;
+
+        .chip {
+          font-size: 13px;
+          line-height: 1.6;
+          color: $my-text-sub;
+          cursor: pointer;
+          transition: color 0.15s;
+
+          &:hover {
+            color: $my-accent-color;
+          }
+        }
+      }
     }
 
     .notice {
@@ -375,6 +556,19 @@ onMounted(() => load(1))
     .form-card {
       position: static;
     }
+  }
+}
+
+/* 右上角那颗 ✦ 的呼吸感 */
+@keyframes twinkle {
+  0%,
+  100% {
+    opacity: 0.35;
+    transform: scale(0.9) rotate(0deg);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.15) rotate(15deg);
   }
 }
 </style>

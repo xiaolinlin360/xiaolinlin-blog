@@ -7,13 +7,13 @@ export interface GuestbookItem {
   created_at: string
 }
 
-/** 留言列表：最新的在前 */
+/** 留言列表：最新的在前（email 不公开，接口不会返回） */
 export const getGuestbooks = (pageSize = 10, pageNum = 1) =>
   http<{ guestbooks: GuestbookItem[] }>('POST', '/guestbooks/getGuestbook', { pageSize, pageNum })
 
 export const getTotalGuestbook = () =>
   http<{ total: number }>('POST', '/guestbooks/getTotalGuestbook')
 
-/** 发表留言（匿名，称呼 + 内容） */
-export const insertGuestbook = (nickname: string, content: string) =>
-  http<GuestbookItem>('POST', '/guestbooks/insertGuestbook', { nickname, content })
+/** 发表留言（匿名，称呼 + 内容 + 可选邮箱） */
+export const insertGuestbook = (nickname: string, content: string, email = '') =>
+  http<GuestbookItem>('POST', '/guestbooks/insertGuestbook', { nickname, content, email })
