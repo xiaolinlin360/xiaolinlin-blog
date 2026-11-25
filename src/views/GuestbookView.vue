@@ -104,8 +104,12 @@
           </div>
           <p class="message-body">{{ item.content }}</p>
 
-          <!-- 作者回复的位置，功能以后再做 -->
-          <p v-if="item.reply" class="reply">{{ item.reply }}</p>
+          <!-- 博主回复：一条留言配一条，底色淡淡一层，跟他的排版一致 -->
+          <div v-if="item.reply" class="reply">
+            <span class="reply-name">{{ ownerName }}</span>
+            <span class="reply-text">{{ item.reply }}</span>
+            <time v-if="item.replied_at" class="reply-date">{{ dateOf(item.replied_at) }}</time>
+          </div>
         </article>
 
         <button v-if="items.length < total" class="more" type="button" @click="loadMore">
@@ -119,17 +123,15 @@
 <script setup lang="ts">
 import { ref, onMounted, nextTick } from 'vue'
 import { ChatLineSquare, Promotion } from '@element-plus/icons-vue'
-import { getGuestbooks, getTotalGuestbook, insertGuestbook } from '@/api/guestbook'
+import { getGuestbooks, getTotalGuestbook, insertGuestbook, type GuestbookItem } from '@/api/guestbook'
+import { getProfile } from '@/api/profile'
 import { dateOf } from '@/utils/format'
 
-/** 列表里的一条，先给 reply 占个位（后端还没有这个字段） */
-interface MessageItem {
-  id: string
-  nickname: string
-  content: string
-  created_at: string
-  reply?: string
-}
+/** 留言列表里的一条（reply / replied_at 由后端带回） */
+type MessageItem = GuestbookItem
+
+/** 博主自己的名字，回复块里显示用 */
+const ownerName = ref('博主')
 
 const items = ref<MessageItem[]>([])
 const total = ref(0)
@@ -234,7 +236,15 @@ const submit = async () => {
   }
 }
 
-onMounted(() => load(1))
+onMounted(async () => {
+  await load(1)
+  // 回复块里要显示博主名字，顺手拿一下
+  try {
+    ownerName.value = (await getProfile()).name
+  } catch (error) {
+    console.error('获取博主信息失败', error)
+  }
+})
 </script>
 
 <style scoped lang="scss">
@@ -504,16 +514,36 @@ onMounted(() => load(1))
       overflow-wrap: anywhere;
     }
 
-    /* 作者回复（后端字段还没做，先留着样式） */
+    /* 博主回复：一块淡淡的底色，前面挂博主的名字，跟他的排版一样 */
     .reply {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: baseline;
+      gap: 6px;
       margin-top: 12px;
       padding: 10px 14px;
-      border-left: 3px solid $my-accent-color;
-      border-radius: 0 8px 8px 0;
+      border-radius: 8px;
       background-color: color-mix(in srgb, var(--my-accent-color) 8%, transparent);
       font-size: 13px;
       line-height: 1.8;
       color: $my-text-main;
+
+      .reply-name {
+        flex: none;
+        font-weight: 600;
+        color: $my-accent-color;
+      }
+
+      .reply-text {
+        overflow-wrap: anywhere;
+      }
+
+      /* 回复时间缩到最右上角，淡一点 */
+      .reply-date {
+        margin-left: auto;
+        font-size: 11px;
+        color: $my-text-light;
+      }
     }
   }
 
