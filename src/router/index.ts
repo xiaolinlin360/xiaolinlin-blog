@@ -59,7 +59,7 @@ const routes = [
   {
     path: '/guestbook',
     name: 'guestbook',
-    component: () => import('@/views/PagePlaceholder.vue'),
+    component: () => import('@/views/GuestbookView.vue'),
     meta: { title: '留言' },
   },
 
