@@ -55,8 +55,9 @@ import {
   siPython,
   siGithub,
 } from 'simple-icons'
-import { Reading, Cloudy, Sunny, Picture, Avatar, MagicStick } from '@element-plus/icons-vue'
+import { Reading, ChatDotRound, Sunny, Picture, Avatar, MagicStick } from '@element-plus/icons-vue'
 import { skillClicks } from '@/composables/useSkillFx'
+import { toggleDark } from '@/composables/useTheme'
 
 interface BrandIcon {
   path: string
@@ -97,10 +98,10 @@ interface LinkItem {
 const links: LinkItem[] = [
   { name: 'Github', href: 'https://github.com/xiaolinlin360', path: siGithub.path },
   // TODO: Blog 要跳另一个主页面，等那边做出来再把地址填上
+  { name: 'Light', comp: Sunny, onClick: () => toggleDark() },
   { name: 'Article', href: '/article', comp: Reading },
-  { name: 'Cloud', comp: Cloudy },
-  { name: 'Light', comp: Sunny },
-  { name: 'Album', comp: Picture },
+  { name: 'Album', href: '/gallery', comp: Picture },
+  { name: 'guestbook', href: '/guestbook', comp: ChatDotRound },
   { name: 'Virtual Characters', comp: Avatar },
   // 点一下：右栏图标墙依次淡出 → 随机打乱位置 → 依次淡入
   { name: 'Skills', comp: MagicStick, onClick: () => skillClicks.value++ },
